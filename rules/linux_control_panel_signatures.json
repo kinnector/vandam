@@ -1,0 +1,116 @@
+{
+  "description": "Control panel service signatures (cPanel, Plesk, Webmin, aaPanel, CyberPanel, HestiaCP, VestaCP) for host-native auto-discovery and config-driven policy enforcement.",
+  "services": [
+    {
+      "service_type": "cpanel",
+      "executables": ["cpsrvd", "cpdavd", "queueprocd", "tailwatchd"],
+      "default_ports": [2082, 2083, 2086, 2087, 2095, 2096],
+      "fd_signatures": ["cpanel.config", "cpanel"],
+      "cmdline_tokens": ["cpsrvd", "cpdavd"],
+      "binary_strings": ["cpsrvd"],
+      "assigned_profile": "none",
+      "config_location": {
+        "cmdline_arg": "",
+        "default_paths": ["/var/cpanel/cpanel.config"]
+      },
+      "config_rules": [
+        { "role": "data_dir", "regex": "datadir=([^\\n]+)" }
+      ],
+      "complexity_indicators": ["addon_domains", "subdomains"]
+    },
+    {
+      "service_type": "plesk",
+      "executables": ["sw-cp-serverd", "sw-engine-fpm"],
+      "default_ports": [8443, 8447],
+      "fd_signatures": ["psa.conf"],
+      "cmdline_tokens": ["sw-cp-server"],
+      "binary_strings": ["sw-cp-server"],
+      "assigned_profile": "none",
+      "config_location": {
+        "cmdline_arg": "",
+        "default_paths": ["/etc/psa/psa.conf"]
+      },
+      "config_rules": [
+        { "role": "data_dir", "regex": "HTTPD_VHOSTS_D\\s+([^\\n]+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "webmin",
+      "executables": ["miniserv.pl"],
+      "default_ports": [10000],
+      "fd_signatures": ["miniserv.conf"],
+      "cmdline_tokens": ["miniserv.pl"],
+      "binary_strings": ["miniserv.pl"],
+      "assigned_profile": "none",
+      "config_location": {
+        "cmdline_arg": "",
+        "default_paths": ["/etc/webmin/miniserv.conf"]
+      },
+      "config_rules": [
+        { "role": "data_dir", "regex": "root=([^\\n]+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "aapanel",
+      "executables": ["BT-Panel", "BT-Task"],
+      "default_ports": [8888],
+      "fd_signatures": ["config.json"],
+      "cmdline_tokens": ["BT-Panel"],
+      "binary_strings": ["BT-Panel"],
+      "assigned_profile": "none",
+      "config_location": {
+        "cmdline_arg": "",
+        "default_paths": ["/www/server/panel/config/config.json"]
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "cyberpanel",
+      "executables": ["lscpd"],
+      "default_ports": [8090],
+      "fd_signatures": ["cyberpanel.conf"],
+      "cmdline_tokens": ["lscpd"],
+      "binary_strings": ["lscpd"],
+      "assigned_profile": "none",
+      "config_location": {
+        "cmdline_arg": "",
+        "default_paths": ["/usr/local/lscp/conf/lscpd.conf"]
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "hestiacp",
+      "executables": ["hestia"],
+      "default_ports": [8083],
+      "fd_signatures": ["hestia.conf"],
+      "cmdline_tokens": ["hestia"],
+      "binary_strings": ["hestia"],
+      "assigned_profile": "none",
+      "config_location": {
+        "cmdline_arg": "",
+        "default_paths": ["/usr/local/hestia/conf/hestia.conf"]
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "vestacp",
+      "executables": ["vesta"],
+      "default_ports": [8083],
+      "fd_signatures": ["vesta.conf"],
+      "cmdline_tokens": ["vesta"],
+      "binary_strings": ["vesta"],
+      "assigned_profile": "none",
+      "config_location": {
+        "cmdline_arg": "",
+        "default_paths": ["/usr/local/vesta/conf/vesta.conf"]
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    }
+  ]
+}

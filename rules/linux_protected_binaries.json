@@ -1,0 +1,6 @@
+{
+  "description": "Protected critical binaries on Linux.",
+  "binaries": [
+    "nginx", "apache2", "httpd", "php-fpm", "sshd", "cron", "systemd", "init"
+  ]
+}

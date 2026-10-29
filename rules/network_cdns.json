@@ -1,0 +1,12 @@
+{
+  "description": "Allowed package registries, CDNs, and platforms for software updates/install contexts.",
+  "cdns": [
+    "*.npmjs.org",
+    "*.npmjs.com",
+    "*.pypi.org",
+    "*.python.org",
+    "*.crates.io",
+    "*.github.com",
+    "*.githubusercontent.com"
+  ]
+}

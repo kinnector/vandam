@@ -1,0 +1,6 @@
+{
+  "description": "GUI application process names monitored for display environment mismatches on Linux.",
+  "apps": [
+    "/chrome", "google-chrome", "/firefox", "/electrum", "Exodus", "AtomicWallet"
+  ]
+}

@@ -1,0 +1,680 @@
+{
+  "description": "Core Linux web service signatures (HTTP, Proxies, WSGI/ASGI) for host-native auto-discovery.",
+  "services": [
+    {
+      "service_type": "haproxy",
+      "executables": ["haproxy"],
+      "default_ports": [80, 443, 8404],
+      "unix_sockets": ["/var/run/haproxy.sock"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "-f",
+        "default_paths": ["/etc/haproxy/haproxy.cfg", "/usr/local/etc/haproxy/haproxy.cfg"]
+      },
+      "config_rules": [
+        { "role": "listen_port",  "regex": "^\\s*bind\\s+[^:]*:(\\d+)" },
+        { "role": "cluster_peer", "regex": "^\\s*server\\s+\\S+\\s+([\\d\\.]+):" },
+        { "role": "tls_cert",     "regex": "^\\s*bind\\s+.*ssl\\s+crt\\s+([^\\s]+)" }
+      ],
+      "complexity_indicators": ["lua-load"]
+    },
+    {
+      "service_type": "envoy",
+      "executables": ["envoy"],
+      "default_ports": [10000, 15001],
+      "unix_sockets": [],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "-c",
+        "default_paths": ["/etc/envoy/envoy.yaml"]
+      },
+      "config_rules": [
+        { "role": "listen_port",  "regex": "^\\s*port_value:\\s*(\\d+)" }
+      ],
+      "complexity_indicators": ["ext_proc", "lua", "wasm"]
+    },
+    {
+      "service_type": "traefik",
+      "executables": ["traefik"],
+      "default_ports": [80, 443, 8080],
+      "unix_sockets": [],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "--configFile",
+        "default_paths": ["/etc/traefik/traefik.yml", "/etc/traefik/traefik.toml"]
+      },
+      "config_rules": [
+        { "role": "listen_port",  "regex": "^\\s*address\\s*=\\s*\"?:(\\d+)" }
+      ],
+      "complexity_indicators": ["plugin:", "forwardAuth"]
+    },
+    {
+      "service_type": "squid",
+      "executables": ["squid"],
+      "default_ports": [3128],
+      "unix_sockets": [],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "-f",
+        "default_paths": ["/etc/squid/squid.conf"]
+      },
+      "config_rules": [
+        { "role": "listen_port",  "regex": "^\\s*http_port\\s+(\\d+)" },
+        { "role": "cluster_peer", "regex": "^\\s*cache_peer\\s+([\\d\\.]+)" },
+        { "role": "write_path",   "regex": "^\\s*cache_dir\\s+\\S+\\s+([^\\s]+)" }
+      ],
+      "complexity_indicators": ["url_rewrite_program", "external_acl_type"]
+    },
+    {
+      "service_type": "varnishd",
+      "executables": ["varnishd"],
+      "default_ports": [6081, 6082],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": "-f",
+        "default_paths": ["/etc/varnish/default.vcl"]
+      },
+      "config_rules": [
+        { "role": "listen_port",  "regex": "^\\s*-a\\s+[^:]*:(\\d+)" },
+        { "role": "cluster_peer", "regex": "^\\s*\\.host\\s*=\\s*\"([\\d\\.]+)\"" }
+      ],
+      "complexity_indicators": ["vcl_inline_c"]
+    },
+    {
+      "service_type": "gunicorn",
+      "executables": ["python", "python3", "gunicorn"],
+      "cmdline_tokens": ["gunicorn"],
+      "default_ports": [8000],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": "-c",
+        "default_paths": ["gunicorn.conf.py", "/etc/gunicorn/gunicorn.conf.py"]
+      },
+      "config_rules": [
+        { "role": "listen_port",  "regex": "^\\s*bind\\s*=\\s*['\"][^:]*:(\\d+)['\"]" }
+      ],
+      "complexity_indicators": ["pre_exec", "post_fork", "subprocess"]
+    },
+    {
+      "service_type": "uwsgi",
+      "executables": ["uwsgi"],
+      "default_ports": [8080],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": "--ini",
+        "default_paths": ["uwsgi.ini"]
+      },
+      "config_rules": [
+        { "role": "listen_port",  "regex": "^\\s*http-socket\\s*=\\s*[^:]*:(\\d+)" },
+        { "role": "write_path",   "regex": "^\\s*logto\\s*=\\s*(.+)" }
+      ],
+      "complexity_indicators": ["exec-pre-app", "hook-"]
+    },
+    {
+      "service_type": "uvicorn",
+      "executables": ["python", "python3", "uvicorn"],
+      "cmdline_tokens": ["uvicorn"],
+      "default_ports": [8000],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": []
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "daphne",
+      "executables": ["python", "python3", "daphne"],
+      "cmdline_tokens": ["daphne"],
+      "default_ports": [8000],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": []
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "hypercorn",
+      "executables": ["python", "python3", "hypercorn"],
+      "cmdline_tokens": ["hypercorn"],
+      "default_ports": [8000],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": "-c",
+        "default_paths": ["hypercorn.toml"]
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "puma",
+      "executables": ["ruby", "puma"],
+      "cmdline_tokens": ["puma"],
+      "default_ports": [9292],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": "-C",
+        "default_paths": ["config/puma.rb"]
+      },
+      "config_rules": [],
+      "complexity_indicators": ["on_worker_boot", "before_fork"]
+    },
+    {
+      "service_type": "unicorn",
+      "executables": ["ruby", "unicorn"],
+      "cmdline_tokens": ["unicorn"],
+      "default_ports": [8080],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": "-c",
+        "default_paths": ["config/unicorn.rb"]
+      },
+      "config_rules": [],
+      "complexity_indicators": ["before_fork", "after_fork"]
+    },
+    {
+      "service_type": "thin",
+      "executables": ["ruby", "thin"],
+      "cmdline_tokens": ["thin"],
+      "default_ports": [3000],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": "-C",
+        "default_paths": ["config/thin.yml"]
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "bun",
+      "executables": ["bun"],
+      "cmdline_tokens": ["bun", "serve", "run"],
+      "default_ports": [3000, 8080],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["bunfig.toml", "package.json"]
+      },
+      "config_rules": [
+        { "role": "write_path", "regex": "\"outdir\"\\s*:\\s*\"([^\"]+)\"" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "deno",
+      "executables": ["deno"],
+      "cmdline_tokens": ["deno", "serve", "run"],
+      "default_ports": [8000, 8080],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["deno.json", "deno.jsonc"]
+      },
+      "config_rules": [],
+      "complexity_indicators": ["--allow-run", "Deno.run", "new Deno.Command"]
+    },
+    {
+      "service_type": "falcon",
+      "executables": ["python", "python3", "falcon"],
+      "cmdline_tokens": ["falcon"],
+      "default_ports": [8000],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": []
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "waitress",
+      "executables": ["python", "python3", "waitress-serve"],
+      "cmdline_tokens": ["waitress", "waitress-serve"],
+      "default_ports": [8080],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": []
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "tornado",
+      "executables": ["python", "python3"],
+      "cmdline_tokens": ["tornado"],
+      "default_ports": [8888, 8080],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": []
+      },
+      "config_rules": [],
+      "complexity_indicators": ["subprocess", "os.execv"]
+    },
+    {
+      "service_type": "werkzeug-dev",
+      "executables": ["python", "python3"],
+      "cmdline_tokens": ["werkzeug", "flask", "run"],
+      "default_ports": [5000],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": [".env", ".flaskenv"]
+      },
+      "config_rules": [],
+      "complexity_indicators": ["use_reloader=True", "threaded=True"]
+    },
+    {
+      "service_type": "passenger",
+      "executables": ["PassengerAgent", "passenger"],
+      "cmdline_tokens": ["PassengerAgent", "passenger", "start"],
+      "default_ports": [3000, 80, 443],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": "--config-file",
+        "default_paths": ["/etc/nginx/nginx.conf", "/etc/apache2/apache2.conf"]
+      },
+      "config_rules": [
+        { "role": "write_path", "regex": "passenger_temp_path\\s+(.+)" },
+        { "role": "write_path", "regex": "passenger_log_file\\s+(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "openresty",
+      "executables": ["openresty", "nginx"],
+      "cmdline_tokens": ["openresty"],
+      "default_ports": [80, 443, 8080],
+      "unix_sockets": ["/var/run/openresty.sock"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "-c",
+        "default_paths": [
+          "/etc/nginx/nginx.conf",
+          "/etc/nginx/sites-enabled",
+          "/etc/nginx/conf.d",
+          "/usr/local/nginx/conf/nginx.conf",
+          "/opt/nginx/conf/nginx.conf",
+          "/usr/local/openresty/nginx/conf/nginx.conf",
+          "/etc/openresty/nginx.conf"
+        ]
+      },
+      "config_rules": [
+        { "role": "listen_port", "regex": "^\\s*listen\\s+(\\d+)" },
+        { "role": "write_path",  "regex": "^\\s*access_log\\s+([^;\\s]+)" },
+        { "role": "write_path",  "regex": "^\\s*error_log\\s+([^;\\s]+)" }
+      ],
+      "complexity_indicators": ["content_by_lua", "access_by_lua", "rewrite_by_lua", "set_by_lua", "lua_package_path"]
+    },
+    {
+      "service_type": "lighttpd",
+      "executables": ["lighttpd"],
+      "cmdline_tokens": ["-f"],
+      "default_ports": [80, 443],
+      "unix_sockets": ["/var/run/lighttpd.sock"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "-f",
+        "default_paths": ["/etc/lighttpd/lighttpd.conf"]
+      },
+      "config_rules": [
+        { "role": "listen_port", "regex": "^server\\.port\\s*=\\s*(\\d+)" },
+        { "role": "write_path",  "regex": "^server\\.document-root\\s*=\\s*\"([^\"]+)\"" },
+        { "role": "write_path",  "regex": "^accesslog\\.filename\\s*=\\s*\"([^\"]+)\"" }
+      ],
+      "complexity_indicators": ["mod_cgi", "mod_fastcgi", "mod_scgi"]
+    },
+    {
+      "service_type": "roadrunner",
+      "executables": ["rr", "roadrunner"],
+      "cmdline_tokens": ["rr", "serve", "worker"],
+      "default_ports": [8080],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "allow_cwd": true,
+      "config_location": {
+        "cmdline_arg": "-c",
+        "default_paths": [".rr.yaml", "rr.yaml"]
+      },
+      "config_rules": [
+        { "role": "write_path", "regex": "^\\s*dir:\\s*(.+)" },
+        { "role": "write_path", "regex": "logs:\\s*\\n\\s*mode:\\s*file\\s*\\n\\s*output:\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "swoole",
+      "executables": ["php", "php-fpm"],
+      "cmdline_tokens": ["swoole"],
+      "default_ports": [9501, 9502],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": []
+      },
+      "config_rules": [],
+      "complexity_indicators": ["Process::exec", "Co\\run", "runtime_enable_coroutine"]
+    },
+    {
+      "service_type": "phoenix",
+      "executables": ["beam.smp"],
+      "cmdline_tokens": ["phoenix", "Elixir.Phoenix", "phx.server"],
+      "default_ports": [4000, 4001],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["config/runtime.exs", "config/config.exs", ".env"]
+      },
+      "config_rules": [
+        { "role": "write_path", "regex": "uploads_dir:\\s*\"([^\"]+)\"" },
+        { "role": "write_path", "regex": "log_path:\\s*\"([^\"]+)\"" }
+      ],
+      "complexity_indicators": ["Port.open", "System.cmd", ":os.cmd"]
+    },
+    {
+      "service_type": "php-fpm",
+      "executables": ["php-fpm", "php-fpm7.0", "php-fpm7.1", "php-fpm7.2", "php-fpm7.3", "php-fpm7.4", "php-fpm8.0", "php-fpm8.1", "php-fpm8.2", "php-fpm8.3", "php-fpm8.4", "php-cgi", "php-cgi7.4", "php-cgi8.0", "php-cgi8.1", "php-cgi8.2", "php-cgi8.3", "php-cgi8.4"],
+      "cmdline_tokens": ["php-fpm", "php-cgi"],
+      "default_ports": [9000],
+      "unix_sockets": ["/var/run/php/php-fpm.sock", "/var/run/php-fpm.sock", "/run/php/php-fpm.sock"],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": "-y",
+        "alt_cmdline_arg": "-c",
+        "default_paths": ["/etc/php/8.3/fpm/php-fpm.conf", "/etc/php/8.2/fpm/php-fpm.conf", "/etc/php/8.1/fpm/php-fpm.conf", "/etc/php/8.0/fpm/php-fpm.conf", "/etc/php/7.4/fpm/php-fpm.conf", "/etc/php-fpm.conf", "/usr/local/etc/php-fpm.conf"]
+      },
+      "config_rules": [
+        { "role": "listen_port", "regex": "^\\s*listen\\s*=\\s*[^:]*:(\\d+)" },
+        { "role": "write_path", "regex": "^\\s*error_log\\s*=\\s*(.+)" },
+        { "role": "write_path", "regex": "^\\s*access\\.log\\s*=\\s*(.+)" },
+        { "role": "write_path", "regex": "^\\s*slowlog\\s*=\\s*(.+)" }
+      ],
+      "complexity_indicators": ["auto_prepend_file", "auto_append_file"]
+    },
+    {
+      "service_type": "php-cli-server",
+      "executables": ["php", "php7.4", "php8.0", "php8.1", "php8.2", "php8.3", "php8.4"],
+      "cmdline_tokens": ["-S"],
+      "default_ports": [8000, 8080],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": "-c",
+        "default_paths": ["php.ini"]
+      },
+      "config_rules": [
+        { "role": "write_path", "regex": "^\\s*error_log\\s*=\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "node",
+      "executables": ["node", "nodejs", "node16", "node18", "node20", "node22"],
+      "cmdline_tokens": ["server.js", "app.js", "index.js", "main.js", "bin/www"],
+      "default_ports": [3000, 8000, 8080],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["package.json"]
+      },
+      "config_rules": [],
+      "complexity_indicators": ["child_process", "cluster.fork"]
+    },
+    {
+      "service_type": "java-servlet",
+      "executables": ["java", "java8", "java11", "java17", "java21", "catalina", "catalina.sh", "tomcat", "jetty", "wildfly"],
+      "cmdline_tokens": ["org.apache.catalina.startup.Bootstrap", "org.springframework.boot.loader", "org.eclipse.jetty", "org.jboss.as", "-jar"],
+      "default_ports": [8080, 8443],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": "-config",
+        "default_paths": ["/etc/tomcat9/server.xml", "/etc/tomcat10/server.xml", "application.properties", "application.yml"]
+      },
+      "config_rules": [
+        { "role": "listen_port", "regex": "port=\"(\\d+)\"" },
+        { "role": "write_path", "regex": "appBase=\"([^\"]+)\"" }
+      ],
+      "complexity_indicators": ["Runtime.getRuntime().exec", "ProcessBuilder"]
+    },
+    {
+      "service_type": "ruby-rack",
+      "executables": ["ruby", "ruby2.7", "ruby3.0", "ruby3.1", "ruby3.2", "ruby3.3"],
+      "cmdline_tokens": ["rails server", "rackup", "config.ru", "bin/rails s"],
+      "default_ports": [3000, 9292],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": "-c",
+        "default_paths": ["config/puma.rb", "config/application.rb"]
+      },
+      "config_rules": [],
+      "complexity_indicators": ["system(", "exec(", "spawn("]
+    },
+    {
+      "service_type": "python-wsgi",
+      "executables": ["python", "python2", "python3", "python3.8", "python3.9", "python3.10", "python3.11", "python3.12", "python3.13"],
+      "cmdline_tokens": ["manage.py runserver", "flask run", "http.server", "fastapi run", "uvicorn"],
+      "default_ports": [8000, 5000, 8080],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": []
+      },
+      "config_rules": [],
+      "complexity_indicators": ["subprocess.Popen", "os.system", "os.exec"]
+    },
+    {
+      "service_type": "perl-fcgi",
+      "executables": ["perl", "perl5", "perl5.32", "perl5.34", "perl5.36", "perl5.38"],
+      "cmdline_tokens": ["fcgi", "plackup", "starman", "hypnotoad"],
+      "default_ports": [5000, 8080],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": []
+      },
+      "config_rules": [],
+      "complexity_indicators": ["system(", "exec("]
+    },
+    {
+      "service_type": "lua-server",
+      "executables": ["lua", "lua5.1", "lua5.2", "lua5.3", "lua5.4", "luajit"],
+      "cmdline_tokens": ["lapis", "pegasus"],
+      "default_ports": [8080],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["config.lua"]
+      },
+      "config_rules": [],
+      "complexity_indicators": ["os.execute", "io.popen"]
+    },
+    {
+      "service_type": "dotnet-server",
+      "executables": ["dotnet", "mono", "mono-sgen"],
+      "cmdline_tokens": ["Kestrel", "run", ".dll"],
+      "default_ports": [5000, 5001],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["appsettings.json"]
+      },
+      "config_rules": [],
+      "complexity_indicators": ["Process.Start"]
+    },
+    {
+      "service_type": "apache",
+      "executables": ["httpd", "apache2"],
+      "default_ports": [80, 443, 8080, 8081],
+      "unix_sockets": [],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "-f",
+        "default_paths": [
+          "/etc/apache2/sites-enabled",
+          "/etc/httpd/conf.d",
+          "/etc/httpd/vhosts.d",
+          "/usr/local/apache2/conf/extra",
+          "/etc/apache2/httpd.conf",
+          "/etc/httpd/conf/httpd.conf"
+        ]
+      },
+      "config_rules": [
+        { "role": "listen_port", "regex": "^\\s*Listen\\s+(\\d+)" }
+      ],
+      "complexity_indicators": ["mod_cgi", "mod_fcgid", "mod_proxy"]
+    },
+    {
+      "service_type": "bun",
+      "executables": ["bun", "bun-debug"],
+      "default_ports": [3000, 8080],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "default_paths": ["package.json"]
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "deno",
+      "executables": ["deno"],
+      "default_ports": [8000, 8080],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "default_paths": ["deno.json", "deno.jsonc"]
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "uwsgi",
+      "executables": ["uwsgi"],
+      "default_ports": [8000, 3031],
+      "unix_sockets": ["/var/run/uwsgi.sock"],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": "--ini",
+        "default_paths": ["/etc/uwsgi/uwsgi.ini"]
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "puma",
+      "executables": ["puma", "puma-dev"],
+      "default_ports": [3000, 9292],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": "-C",
+        "default_paths": ["config/puma.rb"]
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "passenger",
+      "executables": ["PassengerAgent", "PassengerWatchdog", "passenger"],
+      "default_ports": [3000, 443],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "default_paths": []
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "roadrunner",
+      "executables": ["roadrunner", "rr-worker"],
+      "default_ports": [8080],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": "-c",
+        "default_paths": [".rr.yaml"]
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "wasm",
+      "executables": ["wasmtime", "wasmer", "wasmer-headless"],
+      "default_ports": [8080],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "default_paths": []
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "openresty",
+      "executables": ["openresty"],
+      "default_ports": [80, 443],
+      "unix_sockets": [],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "-c",
+        "default_paths": ["/usr/local/openresty/nginx/conf/nginx.conf"]
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "linkerd",
+      "executables": ["linkerd2-proxy"],
+      "default_ports": [4143, 4191],
+      "unix_sockets": [],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "default_paths": []
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "kong",
+      "executables": ["kong"],
+      "default_ports": [8000, 8443, 8001, 8444],
+      "unix_sockets": [],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "default_paths": ["/etc/kong/kong.conf"]
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    }
+  ]
+}

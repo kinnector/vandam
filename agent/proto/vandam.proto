@@ -1,0 +1,106 @@
+syntax = "proto3";
+package vandam;
+
+service VandamService {
+    // Bi-directional multiplexed stream for telemetry & real-time control
+    rpc CommandStream(stream AgentMessage) returns (stream ConsoleMessage);
+
+    // Agent Registration RPC
+    rpc RegisterAgent(RegisterRequest) returns (RegisterResponse);
+
+    // Rule & Config Sync
+    rpc SyncRules(RuleSyncRequest) returns (RuleSyncResponse);
+    rpc SyncConfig(ConfigSyncRequest) returns (ConfigSyncResponse);
+
+    // Firewall rule bidirectional sync (vandam, subscribed tier only —
+    // see vandam/src/firewall_sync.rs). Ships JSON, same convention as
+    // ConfigSyncRequest/Response, rather than a fully-typed rule schema in
+    // the wire format, so the rule shape can evolve without a proto change.
+    rpc SyncFirewallRules(FirewallSyncRequest) returns (FirewallSyncResponse);
+}
+
+message RegisterRequest {
+    string agent_id = 1;
+    string license_key = 2;
+    string vandam_version = 3;
+    string core_version = 4;
+    string hostname = 5;
+    string distro = 6;
+    string kernel_version = 7;
+    string lsm_supported = 8;
+    string grub_cmdline = 9;
+    uint32 ram_total_gb = 10;
+}
+
+message RegisterResponse {
+    enum Verdict {
+        ALLOW = 0;
+        DENY = 1;
+        UPDATE_REQUIRED = 2;
+    }
+    Verdict verdict = 1;
+    string message = 2;
+    bool update_required = 3;
+}
+
+message AgentMessage {
+    string agent_id = 1;
+    string license_key = 2;
+    uint64 timestamp_ns = 3;
+    string payload_json = 4;
+    uint32 bpf_capacity_pct = 5;
+}
+
+message ConsoleMessage {
+    string command_id = 1;
+    enum Action {
+        NONE = 0;
+        MAINTENANCE_ENABLE = 1;
+        MAINTENANCE_DISABLE = 2;
+        RELOAD_RULES = 3;
+        RESTART_AGENT = 4;
+    }
+    Action action = 2;
+    uint32 maintenance_duration_mins = 3;
+    string reason = 4;
+    string command_json = 5;
+}
+
+message RuleSyncRequest {
+    string agent_id = 1;
+    string license_key = 2;
+    string current_etag = 3;
+}
+
+message RuleSyncResponse {
+    bool updated = 1;
+    string new_etag = 2;
+    bytes signature = 3;
+    bytes rules_bundle = 4;
+}
+
+message ConfigSyncRequest {
+    string agent_id = 1;
+    string license_key = 2;
+    string current_config_hash = 3;
+}
+
+message ConfigSyncResponse {
+    bool updated = 1;
+    string config_json = 2;
+}
+
+message FirewallSyncRequest {
+    string agent_id = 1;
+    string license_key = 2;
+    // Locally-authored (FirewallProvenance::Local) rules, JSON-encoded —
+    // pushed up so the cloud console can display/manage them too.
+    string local_rules_json = 3;
+}
+
+message FirewallSyncResponse {
+    bool updated = 1;
+    // Cloud-authored rules, JSON-encoded array — the caller tags these
+    // FirewallProvenance::Cloud/locked on receipt, not the wire format.
+    string cloud_rules_json = 2;
+}

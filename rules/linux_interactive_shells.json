@@ -1,0 +1,6 @@
+{
+  "description": "Interactive terminal shells monitored on Linux.",
+  "shells": [
+    "bash", "sh", "zsh", "pwsh", "fish", "dash"
+  ]
+}

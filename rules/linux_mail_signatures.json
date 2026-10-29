@@ -1,0 +1,228 @@
+{
+  "description": "Core Linux mail and messaging service signatures for host-native auto-discovery and config-driven policy enforcement.",
+  "services": [
+    {
+      "service_type": "postfix",
+      "executables": ["master"],
+      "default_ports": [25, 465, 587],
+      "fd_signatures": ["main.cf", "master.cf"],
+      "cmdline_tokens": ["/usr/lib/postfix/sbin/master", "/usr/libexec/postfix/master"],
+      "binary_strings": ["postfix"],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": "-c",
+        "default_paths": ["/etc/postfix/main.cf"]
+      },
+      "config_rules": [
+        { "role": "spool_dir",   "regex": "^queue_directory\\s*=\\s*(.+)" },
+        { "role": "write_path",  "regex": "^virtual_mailbox_base\\s*=\\s*(.+)" },
+        { "role": "write_path",  "regex": "^mail_spool_directory\\s*=\\s*(.+)" },
+        { "role": "read_path",   "regex": "^alias_maps\\s*=\\s*(.+)" },
+        { "role": "read_path",   "regex": "^virtual_alias_maps\\s*=\\s*(.+)" }
+      ],
+      "complexity_indicators": ["content_filter", "pipe", "argv="],
+      "amavisd_integration_note": "If 'content_filter = smtp:[127.0.0.1]:10024' or 'content_filter = lmtp:...' is present, ensure the amavisd service is separately profiled. Postfix itself only makes an LMTP network connection — it does not fork amavisd. Alert MEDIUM if amavisd is detected by content_filter line but no amavisd signature is matched at discovery time."
+    },
+    {
+      "service_type": "exim",
+      "executables": ["exim", "exim4"],
+      "default_ports": [25, 465, 587],
+      "fd_signatures": ["exim.conf"],
+      "cmdline_tokens": ["-bd"],
+      "binary_strings": ["exim"],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": "-C",
+        "default_paths": ["/etc/exim/exim.conf", "/etc/exim4/exim4.conf"]
+      },
+      "config_rules": [
+        { "role": "spool_dir",   "regex": "^spool_directory\\s*=\\s*(.+)" },
+        { "role": "write_path",  "regex": "^log_file_path\\s*=\\s*(.+)" },
+        { "role": "read_path",   "regex": "^alias_file\\s*=\\s*(.+)" }
+      ],
+      "complexity_indicators": ["perl_startup", "transport_filter", "pipe"]
+    },
+    {
+      "service_type": "dovecot",
+      "executables": ["dovecot"],
+      "default_ports": [143, 993, 110, 995],
+      "fd_signatures": ["dovecot.conf"],
+      "cmdline_tokens": [],
+      "binary_strings": ["dovecot"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "-c",
+        "default_paths": ["/etc/dovecot/dovecot.conf"]
+      },
+      "config_rules": [
+        { "role": "write_path",  "regex": "^mail_location\\s*=\\s*(.+)" },
+        { "role": "write_path",  "regex": "^base_dir\\s*=\\s*(.+)" }
+      ],
+      "complexity_indicators": ["mail_executable"]
+    },
+    {
+      "service_type": "sendmail",
+      "executables": ["sendmail"],
+      "default_ports": [25],
+      "fd_signatures": ["sendmail.cf", "submit.cf"],
+      "cmdline_tokens": ["-bd", "-bs"],
+      "binary_strings": ["sendmail"],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": "-C",
+        "default_paths": ["/etc/mail/sendmail.cf", "/etc/sendmail.cf"]
+      },
+      "additional_config_paths": [
+        "/etc/aliases",
+        "/etc/mail/aliases",
+        "/etc/mail/virtusertable"
+      ],
+      "config_rules": [
+        { "role": "spool_dir",  "regex": "^O QueueDirectory=(.+)" },
+        { "role": "write_path", "regex": "^O DeadLetterDrop=(.+)" },
+        { "role": "exec_path",  "regex": "^Mprog,\\s*P=([^,]+)" },
+        { "role": "exec_path",  "regex": "^[a-zA-Z0-9_.+-]+:\\s*\\|([^\\s\",]+)", "source": "aliases", "escalation": { "shell_interpreter": "PARTIAL_POLICY+CRITICAL", "nonstandard_path": "PARTIAL_POLICY+HIGH" } }
+      ],
+      "complexity_indicators": ["Mprog,", "Mlocal,", "|/", "FEATURE(`local_lmtp')"]
+    },
+    {
+      "service_type": "amavisd",
+      "executables": ["amavisd-new", "amavisd"],
+      "default_ports": [10024, 10025],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["/etc/amavis/conf.d/", "/etc/amavisd.conf", "/etc/amavis/amavisd.conf"]
+      },
+      "config_rules": [
+        { "role": "exec_path",   "regex": "\\$av_scanners.*?\\[([^,\"]+)" },
+        { "role": "outbound_ip", "regex": "\\$relay_hostname\\s*=\\s*['\"]([^'\"]+)" },
+        { "role": "write_path",  "regex": "\\$MYHOME\\s*=\\s*['\"]([^'\"]+)" },
+        { "role": "write_path",  "regex": "\\$TEMPBASE\\s*=\\s*['\"]([^'\"]+)" }
+      ],
+      "static_exec_allowlist": [
+        "/usr/bin/spamc",
+        "/usr/bin/spamassassin",
+        "/usr/bin/clamdscan",
+        "/usr/bin/clamscan",
+        "/usr/bin/razor-check",
+        "/usr/bin/razor-report",
+        "/usr/bin/pyzor",
+        "/usr/bin/dccproc",
+        "/usr/lib/dcc/dccproc",
+        "/usr/bin/opendkim",
+        "/usr/bin/opendmarc",
+        "/usr/bin/altermime",
+        "/usr/bin/reformime"
+      ],
+      "complexity_indicators": [
+        "$sa_spawn_with_perl_interpreter",
+        "@av_scanners_backup"
+      ],
+      "nonstandard_scanner_escalation": "If any path in @av_scanners is outside /usr/bin/ or /usr/local/bin/ -> PARTIAL_POLICY + HIGH alert: 'amavisd scanner at non-standard path. Not fully protected.'"
+    },
+    {
+      "service_type": "courier",
+      "executables": ["courier", "couriertcpd"],
+      "default_ports": [143, 993, 110, 995],
+      "fd_signatures": ["imapd", "imapd-ssl", "pop3d"],
+      "cmdline_tokens": ["couriertcpd", "imaplogin", "pop3login"],
+      "binary_strings": ["couriertcpd"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["/etc/courier/imapd", "/etc/courier/pop3d"]
+      },
+      "config_rules": [
+        { "role": "write_path", "regex": "^MAILDIR=(.+)" },
+        { "role": "write_path", "regex": "^MAILDIRPATH=(.+)" }
+      ],
+      "complexity_indicators": ["AUTHMODULE", "AUTHDAEMONVAR"]
+    },
+    {
+      "service_type": "haraka",
+      "executables": ["node", "haraka"],
+      "default_ports": [25, 587],
+      "fd_signatures": [],
+      "cmdline_tokens": ["haraka", "-c"],
+      "binary_strings": ["haraka"],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": "-c",
+        "default_paths": ["/etc/haraka", "/opt/haraka"]
+      },
+      "config_rules": [
+        { "role": "write_path", "regex": "^spool_dir\\s*=\\s*(.+)" }
+      ],
+      "complexity_indicators": ["plugins", "run_hooks"]
+    },
+    {
+      "service_type": "mailhog",
+      "executables": ["mailhog", "MailHog"],
+      "default_ports": [1025, 8025],
+      "fd_signatures": [],
+      "cmdline_tokens": ["mailhog"],
+      "binary_strings": ["MailHog", "github.com/mailhog"],
+      "assigned_profile": "restricted-execution",
+      "allow_cwd": true,
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": []
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "stalwart-mail",
+      "executables": ["stalwart-mail"],
+      "default_ports": [25, 465, 587, 143, 993, 4190],
+      "fd_signatures": [],
+      "cmdline_tokens": ["--config"],
+      "binary_strings": ["Stalwart", "stalwart-mail"],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": "--config",
+        "default_paths": ["/etc/stalwart-mail/config.toml", "/opt/stalwart-mail/etc/config.toml"]
+      },
+      "config_rules": [
+        { "role": "write_path", "regex": "^store\\.\\S+\\.path\\s*=\\s*(.+)" },
+        { "role": "write_path", "regex": "^directory\\.\\S+\\.path\\s*=\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "maddy",
+      "executables": ["maddy"],
+      "default_ports": [25, 465, 587, 143, 993],
+      "fd_signatures": [],
+      "cmdline_tokens": ["-config"],
+      "binary_strings": ["maddy", "github.com/foxcpp/maddy"],
+      "assigned_profile": "restricted-execution",
+      "allow_cwd": true,
+      "config_location": {
+        "cmdline_arg": "-config",
+        "default_paths": ["/etc/maddy/maddy.conf"]
+      },
+      "config_rules": [
+        { "role": "write_path", "regex": "state_dir\\s+(.+)" },
+        { "role": "write_path", "regex": "^\\s*dir\\s+(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "haraka",
+      "executables": ["node"],
+      "default_ports": [25, 465, 587],
+      "fd_signatures": [],
+      "cmdline_tokens": ["haraka"],
+      "binary_strings": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "default_paths": ["config/smtp.json", "config/smtp.yaml"]
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "description": "Web server process names monitored for potential compromises on Linux.",
+  "processes": [
+    "nginx", "apache2", "httpd", "caddy", "php-fpm", "node",
+    "python3", "python", "ruby", "java", "gunicorn", "uvicorn",
+    "uwsgi", "lighttpd"
+  ]
+}

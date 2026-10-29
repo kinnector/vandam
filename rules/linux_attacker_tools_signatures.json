@@ -1,0 +1,154 @@
+{
+  "description": "Attack tool and threat actor binary signatures. Detection of these executables in any process context triggers an alert regardless of assigned_profile. No allowed dirs — these should never be running. Severity and block behaviour are enforced at the vandam policy layer.",
+
+  "tools": [
+    {
+      "tool_type": "metasploit",
+      "executables": ["msfconsole", "msfvenom", "msfrpc", "msfdb"],
+      "binary_strings": ["Metasploit", "msfconsole", "metasploit-framework"],
+      "cmdline_tokens": ["msfconsole", "msfvenom"],
+      "fd_signatures": [".msf4", "msf.db"],
+      "severity": "CRITICAL",
+      "block_execution": true
+    },
+    {
+      "tool_type": "cobalt-strike-beacon",
+      "executables": [],
+      "binary_strings": ["Cobalt Strike", "sleep_mask", "beacon_gate"],
+      "cmdline_tokens": [],
+      "fd_signatures": [],
+      "severity": "CRITICAL",
+      "block_execution": true
+    },
+    {
+      "tool_type": "sliver",
+      "executables": ["sliver", "sliver-server", "sliver-client"],
+      "binary_strings": ["SliverC2", "implant/sliver", "github.com/bishopfox/sliver"],
+      "cmdline_tokens": [],
+      "fd_signatures": [],
+      "severity": "CRITICAL",
+      "block_execution": true
+    },
+    {
+      "tool_type": "empire",
+      "executables": ["empire", "ps-empire"],
+      "binary_strings": ["powershell-empire", "BC-SECURITY/Empire"],
+      "cmdline_tokens": [],
+      "fd_signatures": [],
+      "severity": "CRITICAL",
+      "block_execution": true
+    },
+    {
+      "tool_type": "havoc",
+      "executables": ["havoc", "havoc-c2"],
+      "binary_strings": ["HavocC2", "HcSession", "github.com/HavocFramework"],
+      "cmdline_tokens": [],
+      "fd_signatures": [],
+      "severity": "CRITICAL",
+      "block_execution": true
+    },
+    {
+      "tool_type": "chisel",
+      "executables": ["chisel"],
+      "binary_strings": ["github.com/jpillora/chisel"],
+      "cmdline_tokens": ["server", "client", "--reverse", "--socks5"],
+      "fd_signatures": [],
+      "severity": "HIGH",
+      "block_execution": false,
+      "dual_use": true
+    },
+    {
+      "tool_type": "ligolo-ng",
+      "executables": ["ligolo-ng", "ligolo-agent"],
+      "binary_strings": ["github.com/nicocha30/ligolo-ng"],
+      "cmdline_tokens": ["--listener", "--connect"],
+      "fd_signatures": [],
+      "severity": "HIGH",
+      "block_execution": false,
+      "dual_use": true
+    },
+    {
+      "tool_type": "frp",
+      "executables": ["frps", "frpc"],
+      "binary_strings": ["github.com/fatedier/frp", "frp is a fast reverse proxy"],
+      "cmdline_tokens": ["-c"],
+      "fd_signatures": ["frpc.ini", "frps.ini", "frpc.toml", "frps.toml"],
+      "severity": "HIGH",
+      "block_execution": false,
+      "dual_use": true
+    },
+    {
+      "tool_type": "ngrok",
+      "executables": ["ngrok"],
+      "binary_strings": ["ngrok.com", "ngrok.io"],
+      "cmdline_tokens": ["http", "tcp"],
+      "fd_signatures": [],
+      "severity": "HIGH",
+      "block_execution": false,
+      "dual_use": true
+    },
+    {
+      "tool_type": "pspy",
+      "executables": ["pspy", "pspy32", "pspy64"],
+      "binary_strings": ["github.com/DominicBreuker/pspy"],
+      "cmdline_tokens": [],
+      "fd_signatures": [],
+      "severity": "HIGH",
+      "block_execution": true
+    },
+    {
+      "tool_type": "linenum",
+      "executables": ["LinEnum.sh", "linenum.sh", "linux-exploit-suggester.sh"],
+      "binary_strings": ["LinEnum", "linux-exploit-suggester"],
+      "cmdline_tokens": [],
+      "fd_signatures": [],
+      "severity": "HIGH",
+      "block_execution": true
+    },
+    {
+      "tool_type": "pypykatz",
+      "executables": ["pypykatz"],
+      "binary_strings": ["pypykatz"],
+      "cmdline_tokens": ["lsa", "minidump"],
+      "fd_signatures": [],
+      "severity": "CRITICAL",
+      "block_execution": true
+    },
+    {
+      "tool_type": "impacket",
+      "executables": ["secretsdump.py", "wmiexec.py", "psexec.py", "smbexec.py", "ntlmrelayx.py"],
+      "binary_strings": ["Impacket v", "SecretsDump"],
+      "cmdline_tokens": [],
+      "fd_signatures": [],
+      "severity": "HIGH",
+      "block_execution": true
+    },
+    {
+      "tool_type": "responder",
+      "executables": ["Responder.py", "responder"],
+      "binary_strings": ["SpiderLabs/Responder", "LLMNR/NBT-NS/mDNS Poisoner"],
+      "cmdline_tokens": ["-I", "--lm", "-w"],
+      "fd_signatures": [],
+      "severity": "CRITICAL",
+      "block_execution": true
+    },
+    {
+      "tool_type": "bloodhound-collector",
+      "executables": ["SharpHound", "bloodhound-python", "rusthound"],
+      "binary_strings": ["BloodHound", "SharpHound", "bloodhound-python"],
+      "cmdline_tokens": ["-c", "All", "--CollectionMethod", "DCOnly"],
+      "fd_signatures": [],
+      "severity": "HIGH",
+      "block_execution": true
+    },
+    {
+      "tool_type": "hekatomb",
+      "executables": ["hekatomb", "lsassy"],
+      "binary_strings": ["hekatomb", "lsassy"],
+      "cmdline_tokens": [],
+      "fd_signatures": [],
+      "severity": "CRITICAL",
+      "block_execution": true
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "sensitive_files": [
+    {
+      "path": "/.gem/credentials",
+      "category": "user_keystores"
+    },
+    {
+      "path": "Gemfile",
+      "category": "user_keystores"
+    },
+    {
+      "path": ".gemspec",
+      "category": "user_keystores"
+    },
+    {
+      "path": "Rakefile",
+      "category": "user_keystores"
+    },
+    {
+      "path": "/.config/NuGet/NuGet.Config",
+      "category": "user_keystores"
+    },
+    {
+      "path": "/.nuget/",
+      "category": "user_keystores"
+    },
+    {
+      "path": "mix.exs",
+      "category": "user_keystores"
+    },
+    {
+      "path": "/.hex/hex.config",
+      "category": "user_keystores"
+    },
+    {
+      "path": "/.config/dart/pub-credentials.json",
+      "category": "user_keystores"
+    },
+    {
+      "path": "/.pub-cache/",
+      "category": "user_keystores"
+    },
+    {
+      "path": "pubspec.yaml",
+      "category": "user_keystores"
+    }
+  ]
+}

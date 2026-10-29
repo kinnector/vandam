@@ -1,0 +1,73 @@
+{
+  "description": "Core container runtime and orchestrator signatures, including API ports, UNIX sockets, and trusted system containers.",
+  "services": [
+    {
+      "service_type": "docker",
+      "executables": ["dockerd"],
+      "default_ports": [2375, 2376],
+      "unix_sockets": ["/var/run/docker.sock"],
+      "assigned_profile": "manual-graining",
+      "escape_protection": true,
+      "config_location": {
+        "default_paths": ["/etc/docker/daemon.json"]
+      }
+    },
+    {
+      "service_type": "containerd",
+      "executables": ["containerd"],
+      "default_ports": [],
+      "unix_sockets": ["/run/containerd/containerd.sock"],
+      "assigned_profile": "manual-graining",
+      "escape_protection": true,
+      "config_location": {
+        "default_paths": ["/etc/containerd/config.toml"]
+      }
+    },
+    {
+      "service_type": "kubelet",
+      "executables": ["kubelet"],
+      "default_ports": [10250, 10255],
+      "unix_sockets": [],
+      "assigned_profile": "manual-graining",
+      "escape_protection": true,
+      "config_location": {
+        "default_paths": ["/var/lib/kubelet/config.yaml"]
+      }
+    },
+    {
+      "service_type": "etcd",
+      "executables": ["etcd"],
+      "default_ports": [2379, 2380],
+      "unix_sockets": [],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "--config-file",
+        "default_paths": ["/etc/etcd/etcd.conf.yml", "/etc/etcd/etcd.conf"]
+      },
+      "config_rules": [
+        { "role": "outbound_ip", "regex": "^initial-cluster:\\s*(.+)" },
+        { "role": "write_path",  "regex": "^data-dir:\\s*(.+)" },
+        { "role": "tls_cert",    "regex": "^cert-file:\\s*(.+)" },
+        { "role": "tls_cert",    "regex": "^key-file:\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "kube-apiserver",
+      "executables": ["kube-apiserver"],
+      "default_ports": [6443],
+      "unix_sockets": [],
+      "assigned_profile": "zero-network",
+      "config_location": {
+        "cmdline_arg": "--config",
+        "default_paths": ["/etc/kubernetes/manifests/kube-apiserver.yaml", "/etc/kubernetes/kube-apiserver.conf"]
+      },
+      "config_rules": [
+        { "role": "outbound_ip", "regex": "--etcd-servers=([^\\s]+)" },
+        { "role": "tls_cert",    "regex": "--tls-cert-file=([^\\s]+)" },
+        { "role": "tls_private_key", "regex": "--tls-private-key-file=([^\\s]+)" }
+      ],
+      "complexity_indicators": []
+    }
+  ]
+}

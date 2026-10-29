@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "trusted_clis": [
+    {
+      "path": "chrome.exe",
+      "category": "browser_db"
+    },
+    {
+      "path": "msedge.exe",
+      "category": "browser_db"
+    },
+    {
+      "path": "brave.exe",
+      "category": "browser_db"
+    }
+  ]
+}

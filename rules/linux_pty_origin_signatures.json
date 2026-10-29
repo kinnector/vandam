@@ -1,0 +1,20 @@
+{
+  "description": "Process ancestry signatures used to classify how an interactive PTY session was reached (login method), for vandam's Access page. Matched against an executable basename found while walking up a shell's parent chain.",
+  "origins": [
+    { "origin_process": "sshd", "pty_type": "SSH" },
+    { "origin_process": "docker-init", "pty_type": "docker exec", "container_scope": true, "orchestrator": "docker" },
+    { "origin_process": "containerd-shim-runc-v2", "pty_type": "docker exec", "container_scope": true, "orchestrator": "docker" },
+    { "origin_process": "containerd-shim", "pty_type": "docker exec", "container_scope": true, "orchestrator": "docker" },
+    { "origin_process": "runc", "pty_type": "docker exec", "container_scope": true, "orchestrator": "docker" },
+    { "origin_process": "conmon", "pty_type": "podman exec", "container_scope": true, "orchestrator": "podman" },
+    { "origin_process": "crun", "pty_type": "podman exec", "container_scope": true, "orchestrator": "podman" },
+    { "origin_process": "sudo", "pty_type": "sudo -i" },
+    { "origin_process": "su", "pty_type": "su" },
+    { "origin_process": "login", "pty_type": "console" },
+    { "origin_process": "agetty", "pty_type": "console" },
+    { "origin_process": "getty", "pty_type": "console" },
+    { "origin_process": "screen", "pty_type": "screen" },
+    { "origin_process": "tmux", "pty_type": "tmux" },
+    { "origin_process": "tmux: server", "pty_type": "tmux" }
+  ]
+}

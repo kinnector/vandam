@@ -1,0 +1,141 @@
+{
+  "version": 1,
+  "trusted_clis": [
+    {
+      "path": "nc",
+      "category": "protected_binary"
+    },
+    {
+      "path": "ncat",
+      "category": "protected_binary"
+    },
+    {
+      "path": "netcat",
+      "category": "protected_binary"
+    },
+    {
+      "path": "socat",
+      "category": "protected_binary"
+    },
+    {
+      "path": "python",
+      "category": "protected_binary"
+    },
+    {
+      "path": "python3",
+      "category": "protected_binary"
+    },
+    {
+      "path": "perl",
+      "category": "protected_binary"
+    },
+    {
+      "path": "ruby",
+      "category": "protected_binary"
+    },
+    {
+      "path": "lua",
+      "category": "protected_binary"
+    },
+    {
+      "path": "tclsh",
+      "category": "protected_binary"
+    },
+    {
+      "path": "expect",
+      "category": "protected_binary"
+    },
+    {
+      "path": "gcc",
+      "category": "protected_binary"
+    },
+    {
+      "path": "clang",
+      "category": "protected_binary"
+    },
+    {
+      "path": "g++",
+      "category": "protected_binary"
+    },
+    {
+      "path": "make",
+      "category": "protected_binary"
+    },
+    {
+      "path": "as",
+      "category": "protected_binary"
+    },
+    {
+      "path": "ld",
+      "category": "protected_binary"
+    },
+    {
+      "path": "sudo",
+      "category": "protected_binary"
+    },
+    {
+      "path": "su",
+      "category": "protected_binary"
+    },
+    {
+      "path": "pkexec",
+      "category": "protected_binary"
+    },
+    {
+      "path": "nmap",
+      "category": "protected_binary"
+    },
+    {
+      "path": "tcpdump",
+      "category": "protected_binary"
+    },
+    {
+      "path": "wireshark",
+      "category": "protected_binary"
+    },
+    {
+      "path": "openssl",
+      "category": "protected_binary"
+    },
+    {
+      "path": "bash",
+      "category": "protected_binary"
+    },
+    {
+      "path": "sh",
+      "category": "protected_binary"
+    },
+    {
+      "path": "zsh",
+      "category": "protected_binary"
+    },
+    {
+      "path": "fish",
+      "category": "protected_binary"
+    },
+    {
+      "path": "dash",
+      "category": "protected_binary"
+    },
+    {
+      "path": "powershell",
+      "category": "protected_binary"
+    },
+    {
+      "path": "pwsh",
+      "category": "protected_binary"
+    },
+    {
+      "path": "cmd",
+      "category": "protected_binary"
+    },
+    {
+      "path": "wscript",
+      "category": "protected_binary"
+    },
+    {
+      "path": "cscript",
+      "category": "protected_binary"
+    }
+  ]
+}

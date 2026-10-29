@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "sensitive_files": [
+    {
+      "path": "/.ethereum/",
+      "category": "wallet"
+    },
+    {
+      "path": "/Exodus/",
+      "category": "wallet"
+    },
+    {
+      "path": "/wallet.dat",
+      "category": "wallet"
+    },
+    {
+      "path": "/.foundry/",
+      "category": "wallet"
+    },
+    {
+      "path": "/.truffle/",
+      "category": "wallet"
+    },
+    {
+      "path": "/.config/truffle/",
+      "category": "wallet"
+    },
+    {
+      "path": "/hardhat-tutorial/",
+      "category": "wallet"
+    },
+    {
+      "path": "/.config/solana/",
+      "category": "wallet"
+    },
+    {
+      "path": "/.sui/",
+      "category": "wallet"
+    }
+  ]
+}

@@ -1,0 +1,274 @@
+{
+  "description": "Core Linux monitoring, logging, and metrics service signatures for host-native auto-discovery and config-driven policy enforcement.",
+  "services": [
+    {
+      "service_type": "node_exporter",
+      "executables": ["node_exporter"],
+      "default_ports": [9100],
+      "fd_signatures": [],
+      "cmdline_tokens": ["node_exporter"],
+      "binary_strings": [],
+      "assigned_profile": "zero-execution",
+      "config_location": null,
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "snmpd",
+      "executables": ["snmpd"],
+      "default_ports": [161, 162],
+      "fd_signatures": ["snmpd.conf"],
+      "cmdline_tokens": ["snmpd"],
+      "binary_strings": ["snmpd"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "-c",
+        "default_paths": ["/etc/snmp/snmpd.conf"]
+      },
+      "config_rules": [],
+      "complexity_indicators": [
+        "extend",
+        "exec",
+        "pass",
+        "pass_persist"
+      ]
+    },
+    {
+      "service_type": "rsyslog",
+      "executables": ["rsyslogd"],
+      "default_ports": [514],
+      "fd_signatures": ["rsyslog.conf"],
+      "cmdline_tokens": [],
+      "binary_strings": ["rsyslogd"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "-f",
+        "default_paths": ["/etc/rsyslog.conf"]
+      },
+      "config_rules": [],
+      "complexity_indicators": [
+        "omprog",
+        "ompipe"
+      ]
+    },
+    {
+      "service_type": "syslog-ng",
+      "executables": ["syslog-ng"],
+      "default_ports": [514],
+      "fd_signatures": ["syslog-ng.conf"],
+      "cmdline_tokens": [],
+      "binary_strings": ["syslog-ng"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "-f",
+        "default_paths": ["/etc/syslog-ng/syslog-ng.conf", "/etc/syslog-ng.conf"]
+      },
+      "config_rules": [],
+      "complexity_indicators": [
+        "program(",
+        "execute("
+      ]
+    },
+    {
+      "service_type": "zabbix_agent",
+      "executables": ["zabbix_agentd", "zabbix_agent2"],
+      "default_ports": [10050],
+      "fd_signatures": ["zabbix_agentd.conf"],
+      "cmdline_tokens": ["zabbix_agentd"],
+      "binary_strings": ["zabbix_agentd"],
+      "assigned_profile": "manual-graining",
+      "config_location": {
+        "cmdline_arg": "-c",
+        "default_paths": ["/etc/zabbix/zabbix_agentd.conf"]
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "splunkd",
+      "executables": ["splunkd"],
+      "default_ports": [8089],
+      "fd_signatures": [],
+      "cmdline_tokens": ["splunkd"],
+      "binary_strings": [],
+      "assigned_profile": "manual-graining",
+      "config_location": null,
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "prometheus",
+      "executables": ["prometheus"],
+      "default_ports": [9090],
+      "unix_sockets": [],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "--config.file",
+        "default_paths": ["/etc/prometheus/prometheus.yml"]
+      },
+      "config_rules": [
+        { "role": "outbound_ip", "regex": "targets:\\s*\\[([^\\]]+)\\]" },
+        { "role": "outbound_ip", "regex": "static_configs:.*?targets:\\s*\\[([^\\]]+)\\]" }
+      ],
+      "complexity_indicators": [
+        "action: exec",
+        "remote_write:"
+      ]
+    },
+    {
+      "service_type": "alertmanager",
+      "executables": ["alertmanager"],
+      "default_ports": [9093],
+      "unix_sockets": [],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "--config.file",
+        "default_paths": ["/etc/alertmanager/alertmanager.yml"]
+      },
+      "config_rules": [
+        { "role": "outbound_ip", "regex": "url:\\s*['\"]?(https?://[^'\"\\s]+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "grafana",
+      "executables": ["grafana-server"],
+      "default_ports": [3000],
+      "unix_sockets": [],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "--config",
+        "default_paths": ["/etc/grafana/grafana.ini", "/usr/share/grafana/conf/defaults.ini"]
+      },
+      "config_rules": [
+        { "role": "outbound_ip", "regex": "^url\\s*=\\s*(.+)" },
+        { "role": "listen_port", "regex": "^http_port\\s*=\\s*(\\d+)" }
+      ],
+      "complexity_indicators": [
+        "rendering.server_url",
+        "renderer_url"
+      ]
+    },
+    {
+      "service_type": "loki",
+      "executables": ["loki"],
+      "default_ports": [3100],
+      "unix_sockets": [],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "-config.file",
+        "default_paths": ["/etc/loki/loki-config.yaml", "/etc/loki/config.yaml"]
+      },
+      "config_rules": [
+        { "role": "outbound_ip", "regex": "join_members:\\s*\\[([^\\]]+)\\]" },
+        { "role": "outbound_ip", "regex": "endpoint:\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "fluent-bit",
+      "executables": ["fluent-bit"],
+      "default_ports": [2020, 24224],
+      "unix_sockets": [],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "-c",
+        "default_paths": ["/etc/fluent-bit/fluent-bit.conf", "/etc/td-agent-bit/td-agent-bit.conf"]
+      },
+      "config_rules": [
+        { "role": "outbound_ip", "regex": "Host\\s+([^\\n]+)" },
+        { "role": "exec_path",   "regex": "Command\\s+([^\\n]+)" }
+      ],
+      "complexity_indicators": [
+        "Name exec",
+        "Name lua"
+      ]
+    },
+    {
+      "service_type": "fluentd",
+      "executables": ["fluentd"],
+      "default_ports": [24224],
+      "unix_sockets": [],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "-c",
+        "default_paths": ["/etc/fluent/fluent.conf", "/etc/td-agent/td-agent.conf"]
+      },
+      "config_rules": [
+        { "role": "outbound_ip", "regex": "host\\s+([^\\n]+)" },
+        { "role": "exec_path",   "regex": "command\\s+([^\\n]+)" }
+      ],
+      "complexity_indicators": [
+        "<source>\n  @type exec",
+        "<match>\n  @type exec",
+        "@type exec_filter"
+      ]
+    },
+    {
+      "service_type": "telegraf",
+      "executables": ["telegraf"],
+      "default_ports": [8094, 8125],
+      "unix_sockets": [],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "--config",
+        "default_paths": ["/etc/telegraf/telegraf.conf", "/etc/telegraf/telegraf.d/*.conf"]
+      },
+      "config_rules": [
+        { "role": "outbound_ip", "regex": "urls\\s*=\\s*\\[([^\\]]+)\\]" },
+        { "role": "exec_path",   "regex": "commands\\s*=\\s*\\[\"([^\"]+)\"" }
+      ],
+      "complexity_indicators": [
+        "[[inputs.exec]]",
+        "[[inputs.execd]]"
+      ]
+    },
+    {
+      "service_type": "collectd",
+      "executables": ["collectd"],
+      "default_ports": [25826],
+      "unix_sockets": [],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "-C",
+        "default_paths": ["/etc/collectd/collectd.conf", "/etc/collectd.conf"]
+      },
+      "config_rules": [
+        { "role": "outbound_ip", "regex": "Server\\s+\"([^\"]+)\"" },
+        { "role": "exec_path",   "regex": "Exec\\s+\"[^\"]+\"\\s+\"([^\"]+)\"" }
+      ],
+      "complexity_indicators": [
+        "<Plugin exec>"
+      ]
+    },
+    {
+      "service_type": "nagios",
+      "executables": ["nagios", "naemon", "icinga2"],
+      "default_ports": [5667],
+      "unix_sockets": [],
+      "assigned_profile": "manual-graining",
+      "config_location": {
+        "cmdline_arg": "-f",
+        "default_paths": ["/etc/nagios/nagios.cfg", "/etc/naemon/naemon.cfg", "/etc/icinga2/icinga2.conf"]
+      },
+      "config_rules": [],
+      "complexity_indicators": [],
+      "alert_message": "Monitoring check executor detected (Nagios/Naemon/Icinga2). Executes arbitrary check plugins by design. Not fully protected. Ensure check plugins are owned by root and not world-writable.",
+      "auto_fix": "audit_plugin_permissions"
+    },
+    {
+      "service_type": "datadog-agent",
+      "executables": ["datadog-agent"],
+      "default_ports": [8125, 8126],
+      "unix_sockets": [],
+      "assigned_profile": "manual-graining",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["/etc/datadog-agent/datadog.yaml"]
+      },
+      "config_rules": [],
+      "complexity_indicators": [],
+      "alert_message": "Datadog Agent detected. Executes integration checks via arbitrary scripts. Not fully protected. No auto-fix available — hardening requires vendor support."
+    }
+  ]
+}

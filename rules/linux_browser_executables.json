@@ -1,0 +1,6 @@
+{
+  "description": "Browser binaries monitored on Linux.",
+  "browsers": [
+    "chrome", "google-chrome", "firefox", "brave"
+  ]
+}

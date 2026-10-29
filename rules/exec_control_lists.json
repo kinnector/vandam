@@ -1,0 +1,21 @@
+{
+  "description": "Vandam's exec-time process-tree classification lists, consulted by bprm_creds_for_exec and its worker helpers. trusted_admin_binaries: exec'ing one of these makes the process tree TREE_TRUSTED_ADMIN (a restricted-command tree, not full trust) - resolved by name via $PATH search, then registered by inode. admin_allowed_commands: commands a TREE_TRUSTED_ADMIN tree may still exec; anything else is denied, so this list IS the allowlist - a matched executable's basename decides membership, not its path. dangerous_tools / priv_esc_binaries: flagged in any threshold-monitored context regardless of tree type, also matched by basename. Replaces what used to be hardcoded arrays in vandam/src/lib.rs (admin_bins) and core/src/linux/ebpf_loader.cpp (PopulateExeNameClasses's kEntries) - see core's CLAUDE.md Known Debt history for why those existed as hardcoded arrays first.",
+
+  "trusted_admin_binaries": [
+    {"executable": "logrotate", "note": "postrotate scripts exec other admin tools; this is the exception the tree classification exists for"},
+    {"executable": "sendmail", "note": "invoked by logrotate/cron postrotate hooks and mail-enabled cron jobs"}
+  ],
+
+  "admin_allowed_commands": [
+    "sh", "bash", "gzip",
+    "nginx", "postfix", "mysqladmin", "redis-cli", "pg_ctl", "pg_ctlcluster",
+    "apache2ctl", "apache2", "logrotate",
+    "kill"
+  ],
+
+  "dangerous_tools": ["nc", "ncat", "netcat", "socat", "tftp"],
+
+  "priv_esc_binaries": ["sudo", "su", "pkexec", "newuidmap", "newgidmap"],
+
+  "untrusted_library_directories": ["tmp", "dev", "mnt"]
+}

@@ -1,0 +1,82 @@
+{
+  "description": "Storage discovery rules for Ruby web frameworks. All .env scanning is handled by scan_process_env_for_storage (Pillar 3) for live processes. Generic Ruby catchall Gemfile gem-presence rules are retained (Low confidence, known_allow_dirs only — no path extraction) as they reference upload library gems with specific, well-known directory conventions. .env anchors removed.",
+  "frameworks": [
+    {
+      "name": "Ruby on Rails",
+      "rules": [
+        {
+          "file_name": "config/application.rb",
+          "relative_path": "tmp/cache",
+          "role": "CompiledCache",
+          "confidence": "High",
+          "known_allow_dirs": ["tmp/cache","tmp/pids","tmp/sockets","log","public/system","public/assets","public/uploads","storage"]
+        },
+        { "file_name": "config/application.rb", "relative_path": "log",           "role": "AppStorage",      "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "config/application.rb", "relative_path": "public/system", "role": "UploadDirectory", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "config/application.rb", "relative_path": "public/assets", "role": "CompiledCache",   "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "config/application.rb", "relative_path": "storage",       "role": "AppStorage",      "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "config/storage.yml",     "key_regex": "root:\\s*(.+)",     "role": "AppStorage",      "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "config/environments/production.rb", "key_regex": "config\\.assets\\.prefix\\s*=\\s*['\"]([^'\"]+)['\"]", "role": "CompiledCache", "confidence": "High", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "Sinatra",
+      "rules": [
+        {
+          "file_name": "config.ru",
+          "relative_path": "public",
+          "role": "AppStorage",
+          "confidence": "Medium",
+          "known_allow_dirs": ["public","public/uploads","tmp","log"]
+        },
+        { "file_name": "config.ru", "relative_path": "tmp",                                             "role": "TempDirectory",   "confidence": "Medium", "known_allow_dirs": [] },
+        { "file_name": "config.ru", "key_regex": "set\\s+:public_folder\\s*,\\s*['\"]([^'\"]+)['\"]",  "role": "AppStorage",      "confidence": "High",   "known_allow_dirs": [] },
+        { "file_name": "config.ru", "key_regex": "UPLOAD_DIR\\s*=\\s*['\"]([^'\"]+)['\"]",             "role": "UploadDirectory", "confidence": "High",   "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "Jekyll",
+      "rules": [
+        {
+          "file_name": "_config.yml",
+          "relative_path": "_site",
+          "role": "CompiledCache",
+          "confidence": "High",
+          "known_allow_dirs": ["_site","assets/uploads","assets/images",".jekyll-cache"]
+        },
+        { "file_name": "_config.yml", "relative_path": ".jekyll-cache",     "role": "CompiledCache",   "confidence": "High",   "known_allow_dirs": [] },
+        { "file_name": "_config.yml", "key_regex": "destination:\\s*(.+)",   "role": "CompiledCache",   "confidence": "High",   "known_allow_dirs": [] },
+        { "file_name": "_config.yml", "key_regex": "uploads_dir:\\s*(.+)",   "role": "UploadDirectory", "confidence": "Medium", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "Middleman",
+      "rules": [
+        {
+          "file_name": "config.rb",
+          "relative_path": "build",
+          "role": "CompiledCache",
+          "confidence": "Medium",
+          "known_allow_dirs": ["build",".cache","source/uploads"]
+        },
+        { "file_name": "config.rb", "relative_path": ".cache",                                    "role": "CompiledCache", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "config.rb", "key_regex": "set\\s+:build_dir\\s*,\\s*['\"]([^'\"]+)['\"]", "role": "CompiledCache", "confidence": "High", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "Capistrano",
+      "rules": [
+        { "file_name": "Capfile", "key_regex": "set\\s+:deploy_to\\s*,\\s*['\"]([^'\"]+)['\"]", "role": "AppStorage", "confidence": "High",   "known_allow_dirs": [] },
+        { "file_name": "Capfile", "key_regex": "linked_dirs.*['\"]([^'\"]+)['\"]",               "role": "AppStorage", "confidence": "Medium", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "Generic Ruby",
+      "rules": [
+        { "file_name": "Gemfile", "key_regex": "gem ['\"]carrierwave['\"]", "role": "UploadDirectory", "confidence": "Low", "known_allow_dirs": ["public/uploads","tmp"] },
+        { "file_name": "Gemfile", "key_regex": "gem ['\"]shrine['\"]",      "role": "UploadDirectory", "confidence": "Low", "known_allow_dirs": ["public/uploads","tmp"] },
+        { "file_name": "Gemfile", "key_regex": "gem ['\"]paperclip['\"]",   "role": "UploadDirectory", "confidence": "Low", "known_allow_dirs": ["public/system","tmp"] }
+      ]
+    }
+  ]
+}

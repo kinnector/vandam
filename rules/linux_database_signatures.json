@@ -1,0 +1,602 @@
+{
+  "description": "Standalone database server signatures for host-native auto-discovery on Linux. Only daemons that run with their own PID, own port/socket, and own data directory are included. Matching priority: executables (primary) > cmdline_tokens (secondary, required for generic runtimes like java/beam.smp) > fd_signatures (tertiary, process must have file open at runtime). binary_strings are ONLY used for generic-runtime databases (java, beam.smp) where the executable alone is insufficient — they must be internal class/module names that only the server process loads, not product names that appear in client drivers or dependencies. All entries include config_location and config_rules for write_path/data_dir extraction. Removed: embedded databases (SQLite, LevelDB, RocksDB, DuckDB, Chroma), monitoring-category databases (Prometheus — covered in monitoring_signatures), messaging-category (NATS — covered in mq_signatures), duplicates (etcd — covered in container_signatures).",
+
+  "databases": [
+    {
+      "db_type": "postgresql",
+      "executables": ["postgres"],
+      "default_ports": [5432],
+      "fd_signatures": ["postmaster.pid", "PG_VERSION", "pg_hba.conf"],
+      "cmdline_tokens": ["-D"],
+      "binary_strings": [],
+      "config_location": {
+        "cmdline_arg": "--config-file",
+        "default_paths": ["/etc/postgresql/postgresql.conf", "/var/lib/pgsql/data/postgresql.conf"],
+        "datadir_from_cmdline": "-D"
+      },
+      "config_rules": [
+        { "role": "data_dir",   "regex": "^data_directory\\s*=\\s*'([^']+)'" },
+        { "role": "write_path", "regex": "^log_directory\\s*=\\s*'([^']+)'" },
+        { "role": "write_path", "regex": "^archive_command\\s*=\\s*'([^']+)'" },
+        { "role": "tls_cert",   "regex": "^ssl_cert_file\\s*=\\s*'([^']+)'" },
+        { "role": "tls_cert",   "regex": "^ssl_key_file\\s*=\\s*'([^']+)'" }
+      ],
+      "complexity_indicators": ["archive_command", "restore_command"]
+    },
+    {
+      "db_type": "mysql",
+      "executables": ["mysqld"],
+      "default_ports": [3306, 33060],
+      "fd_signatures": ["ibdata1", "mysql.ibd", "auto.cnf"],
+      "cmdline_tokens": ["--datadir", "--defaults-file"],
+      "binary_strings": [],
+      "config_location": {
+        "cmdline_arg": "--defaults-file",
+        "default_paths": ["/etc/mysql/mysql.conf.d/mysqld.cnf", "/etc/my.cnf", "/etc/mysql/my.cnf"]
+      },
+      "config_rules": [
+        { "role": "data_dir",   "regex": "^datadir\\s*=\\s*(.+)" },
+        { "role": "write_path", "regex": "^log.error\\s*=\\s*(.+)" },
+        { "role": "write_path", "regex": "^general_log_file\\s*=\\s*(.+)" },
+        { "role": "write_path", "regex": "^slow_query_log_file\\s*=\\s*(.+)" },
+        { "role": "write_path", "regex": "^tmpdir\\s*=\\s*(.+)" },
+        { "role": "tls_cert",   "regex": "^ssl.cert\\s*=\\s*(.+)" },
+        { "role": "tls_cert",   "regex": "^ssl.key\\s*=\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "db_type": "mariadb",
+      "executables": ["mariadbd", "mysqld"],
+      "default_ports": [3306],
+      "fd_signatures": ["ibdata1", "aria_log.00000001", "aria_log_control"],
+      "cmdline_tokens": ["--datadir", "--defaults-file"],
+      "binary_strings": [],
+      "config_location": {
+        "cmdline_arg": "--defaults-file",
+        "default_paths": ["/etc/mysql/mariadb.conf.d/50-server.cnf", "/etc/my.cnf.d/server.cnf", "/etc/my.cnf"]
+      },
+      "config_rules": [
+        { "role": "data_dir",   "regex": "^datadir\\s*=\\s*(.+)" },
+        { "role": "write_path", "regex": "^log.error\\s*=\\s*(.+)" },
+        { "role": "write_path", "regex": "^tmpdir\\s*=\\s*(.+)" },
+        { "role": "tls_cert",   "regex": "^ssl-cert\\s*=\\s*(.+)" },
+        { "role": "tls_cert",   "regex": "^ssl-key\\s*=\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "db_type": "mongodb",
+      "executables": ["mongod"],
+      "default_ports": [27017],
+      "fd_signatures": ["mongod.lock", "WiredTiger.wt", "WiredTiger.turtle"],
+      "cmdline_tokens": ["--dbpath", "--config", "-f"],
+      "binary_strings": [],
+      "config_location": {
+        "cmdline_arg": "--config",
+        "alt_cmdline_arg": "-f",
+        "default_paths": ["/etc/mongod.conf"]
+      },
+      "config_rules": [
+        { "role": "data_dir",   "regex": "^\\s*dbPath:\\s*(.+)" },
+        { "role": "write_path", "regex": "^\\s*path:\\s*(.+)",         "section": "systemLog" },
+        { "role": "write_path", "regex": "^\\s*pidFilePath:\\s*(.+)" },
+        { "role": "tls_cert",   "regex": "^\\s*certificateKeyFile:\\s*(.+)" },
+        { "role": "tls_cert",   "regex": "^\\s*CAFile:\\s*(.+)" },
+        { "role": "outbound_ip","regex": "^\\s*host:\\s*([\\d.a-zA-Z:-]+)",  "section": "replication" }
+      ],
+      "complexity_indicators": ["$where", "mapReduce", "eval"]
+    },
+    {
+      "db_type": "redis",
+      "executables": ["redis-server"],
+      "default_ports": [6379],
+      "fd_signatures": ["dump.rdb", "appendonly.aof", "redis.pid"],
+      "cmdline_tokens": [".conf", "--port", "--save", "--daemonize"],
+      "binary_strings": [],
+      "config_location": {
+        "cmdline_arg": null,
+        "positional_arg": 1,
+        "default_paths": ["/etc/redis/redis.conf", "/etc/redis.conf"]
+      },
+      "config_rules": [
+        { "role": "data_dir",   "regex": "^dir\\s+(.+)" },
+        { "role": "write_path", "regex": "^logfile\\s+(.+)" },
+        { "role": "write_path", "regex": "^dbfilename\\s+(.+)" },
+        { "role": "write_path", "regex": "^appendfilename\\s+(.+)" },
+        { "role": "tls_cert",   "regex": "^tls-cert-file\\s+(.+)" },
+        { "role": "tls_cert",   "regex": "^tls-key-file\\s+(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "db_type": "keydb",
+      "executables": ["keydb-server"],
+      "default_ports": [6379],
+      "fd_signatures": ["dump.rdb", "keydb.pid"],
+      "cmdline_tokens": [".conf", "--port"],
+      "binary_strings": [],
+      "config_location": {
+        "cmdline_arg": null,
+        "positional_arg": 1,
+        "default_paths": ["/etc/keydb/keydb.conf"]
+      },
+      "config_rules": [
+        { "role": "data_dir",   "regex": "^dir\\s+(.+)" },
+        { "role": "write_path", "regex": "^logfile\\s+(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "db_type": "valkey",
+      "executables": ["valkey-server"],
+      "default_ports": [6379],
+      "fd_signatures": ["dump.rdb", "valkey.pid"],
+      "cmdline_tokens": [".conf", "--port"],
+      "binary_strings": [],
+      "config_location": {
+        "cmdline_arg": null,
+        "positional_arg": 1,
+        "default_paths": ["/etc/valkey/valkey.conf"]
+      },
+      "config_rules": [
+        { "role": "data_dir",   "regex": "^dir\\s+(.+)" },
+        { "role": "write_path", "regex": "^logfile\\s+(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "db_type": "dragonfly",
+      "executables": ["dragonfly"],
+      "default_ports": [6379],
+      "fd_signatures": ["dragonfly.dfs", "dragonfly.pid"],
+      "cmdline_tokens": ["--port", "--dbfilename", "--dir"],
+      "binary_strings": [],
+      "config_location": {
+        "cmdline_arg": "--flagfile",
+        "default_paths": []
+      },
+      "config_rules": [
+        { "role": "data_dir",   "regex": "^dir=(.+)" },
+        { "role": "write_path", "regex": "^logfile=(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "db_type": "memcached",
+      "executables": ["memcached"],
+      "default_ports": [11211],
+      "fd_signatures": [],
+      "cmdline_tokens": ["-p", "-l", "-d"],
+      "binary_strings": [],
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["/etc/memcached.conf", "/etc/sysconfig/memcached"]
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "db_type": "cassandra",
+      "executables": ["java"],
+      "default_ports": [9042, 7000, 7001],
+      "fd_signatures": ["cassandra.yaml", "system.log"],
+      "cmdline_tokens": ["org.apache.cassandra.service.CassandraDaemon"],
+      "binary_strings": [],
+      "config_location": {
+        "cmdline_arg": "-Dcassandra.config",
+        "default_paths": ["/etc/cassandra/cassandra.yaml", "/opt/cassandra/conf/cassandra.yaml"]
+      },
+      "config_rules": [
+        { "role": "data_dir",   "regex": "^\\s*-\\s*(.+)",             "section": "data_file_directories" },
+        { "role": "write_path", "regex": "^commitlog_directory:\\s*(.+)" },
+        { "role": "write_path", "regex": "^hints_directory:\\s*(.+)" },
+        { "role": "write_path", "regex": "^saved_caches_directory:\\s*(.+)" },
+        { "role": "outbound_ip","regex": "^\\s*-\\s*([\\d.a-zA-Z:-]+)", "section": "seed_provider" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "db_type": "scylladb",
+      "executables": ["scylla"],
+      "default_ports": [9042, 7000, 7001],
+      "fd_signatures": ["scylla.yaml", "scylla-server.pid"],
+      "cmdline_tokens": ["--options-file", "--data-file-directories", "--commitlog-directory"],
+      "binary_strings": [],
+      "config_location": {
+        "cmdline_arg": "--options-file",
+        "default_paths": ["/etc/scylla/scylla.yaml"]
+      },
+      "config_rules": [
+        { "role": "data_dir",   "regex": "^\\s*-\\s*(.+)",             "section": "data_file_directories" },
+        { "role": "write_path", "regex": "^commitlog_directory:\\s*(.+)" },
+        { "role": "write_path", "regex": "^hints_directory:\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "db_type": "couchdb",
+      "executables": ["beam.smp"],
+      "default_ports": [5984, 6984],
+      "fd_signatures": ["_dbs.couch", "_nodes.couch", "_users.couch"],
+      "cmdline_tokens": ["-couch_ini", "couchdb"],
+      "binary_strings": ["couch_server", "couch_log", "couch_primary_header"],
+      "config_location": {
+        "cmdline_arg": "-couch_ini",
+        "default_paths": ["/etc/couchdb/default.ini", "/etc/couchdb/local.ini"]
+      },
+      "config_rules": [
+        { "role": "data_dir",   "regex": "^database_dir\\s*=\\s*(.+)" },
+        { "role": "write_path", "regex": "^view_index_dir\\s*=\\s*(.+)" },
+        { "role": "write_path", "regex": "^file\\s*=\\s*(.+)",          "section": "log" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "db_type": "elasticsearch",
+      "executables": ["java"],
+      "default_ports": [9200, 9300],
+      "fd_signatures": ["elasticsearch.yml", "jvm.options"],
+      "cmdline_tokens": ["org.elasticsearch.bootstrap.Elasticsearch", "-Des.path.home"],
+      "binary_strings": [],
+      "config_location": {
+        "cmdline_arg": "-Des.path.conf",
+        "default_paths": ["/etc/elasticsearch/elasticsearch.yml"]
+      },
+      "config_rules": [
+        { "role": "data_dir",   "regex": "^path\\.data:\\s*(.+)" },
+        { "role": "write_path", "regex": "^path\\.logs:\\s*(.+)" },
+        { "role": "outbound_ip","regex": "^discovery\\.seed_hosts:\\s*\\[([^\\]]+)\\]" },
+        { "role": "outbound_ip","regex": "^cluster\\.initial_master_nodes:\\s*\\[([^\\]]+)\\]" },
+        { "role": "tls_cert",   "regex": "^xpack\\.security\\.transport\\.ssl\\.keystore\\.path:\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "db_type": "opensearch",
+      "executables": ["java"],
+      "default_ports": [9200, 9300],
+      "fd_signatures": ["opensearch.yml", "jvm.options"],
+      "cmdline_tokens": ["org.opensearch.bootstrap.OpenSearch", "-Dopensearch.path.home"],
+      "binary_strings": [],
+      "config_location": {
+        "cmdline_arg": "-Dopensearch.path.conf",
+        "default_paths": ["/etc/opensearch/opensearch.yml"]
+      },
+      "config_rules": [
+        { "role": "data_dir",   "regex": "^path\\.data:\\s*(.+)" },
+        { "role": "write_path", "regex": "^path\\.logs:\\s*(.+)" },
+        { "role": "outbound_ip","regex": "^discovery\\.seed_hosts:\\s*\\[([^\\]]+)\\]" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "db_type": "neo4j",
+      "executables": ["java"],
+      "default_ports": [7474, 7687],
+      "fd_signatures": ["neo4j.conf", "neostore"],
+      "cmdline_tokens": ["org.neo4j.server.CommunityBootstrapper", "org.neo4j.server.enterprise.EnterpriseBootstrapper"],
+      "binary_strings": [],
+      "config_location": {
+        "cmdline_arg": "--config-dir",
+        "default_paths": ["/etc/neo4j/neo4j.conf"]
+      },
+      "config_rules": [
+        { "role": "data_dir",   "regex": "^server\\.directories\\.data=(.+)" },
+        { "role": "write_path", "regex": "^server\\.directories\\.logs=(.+)" },
+        { "role": "write_path", "regex": "^server\\.directories\\.transaction\\.logs\\.root=(.+)" },
+        { "role": "outbound_ip","regex": "^causal_clustering\\.initial_discovery_members=(.+)" },
+        { "role": "tls_cert",   "regex": "^dbms\\.ssl\\.policy\\.bolt\\.private_key=(.+)" }
+      ],
+      "complexity_indicators": ["apoc.trigger", "apoc.periodic.commit"]
+    },
+    {
+      "db_type": "questdb",
+      "executables": ["java"],
+      "default_ports": [9000, 9009, 8812],
+      "fd_signatures": ["server.conf", "_txn"],
+      "cmdline_tokens": ["io.questdb.ServerMain", "-DQuestDB-Runtime"],
+      "binary_strings": [],
+      "config_location": {
+        "cmdline_arg": "-d",
+        "default_paths": ["/var/lib/questdb/conf/server.conf"]
+      },
+      "config_rules": [
+        { "role": "data_dir",   "regex": "^cairo\\.root=(.+)" },
+        { "role": "write_path", "regex": "^log\\.dir=(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "db_type": "influxdb",
+      "executables": ["influxd"],
+      "default_ports": [8086],
+      "fd_signatures": ["influxd.bolt", "influxd.sqlite"],
+      "cmdline_tokens": ["run", "--bolt-path", "--engine-path"],
+      "binary_strings": [],
+      "config_location": {
+        "cmdline_arg": "--config",
+        "default_paths": ["/etc/influxdb/config.toml", "/etc/influxdb/config.yml"]
+      },
+      "config_rules": [
+        { "role": "data_dir",   "regex": "^engine-path\\s*=\\s*\\\"([^\\\"]+)\\\"" },
+        { "role": "data_dir",   "regex": "^bolt-path\\s*=\\s*\\\"([^\\\"]+)\\\"" },
+        { "role": "write_path", "regex": "^log-level\\s*=\\s*\\\"([^\\\"]+)\\\"" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "db_type": "victoriametrics",
+      "executables": ["victoria-metrics"],
+      "default_ports": [8428],
+      "fd_signatures": ["flock.lock", "metricName.bin"],
+      "cmdline_tokens": ["-storageDataPath"],
+      "binary_strings": [],
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": []
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "db_type": "cockroachdb",
+      "executables": ["cockroach"],
+      "default_ports": [26257, 8080],
+      "fd_signatures": ["COCKROACHDB_VERSION", "LOCK"],
+      "cmdline_tokens": ["start", "start-single-node", "--store"],
+      "binary_strings": [],
+      "config_location": {
+        "cmdline_arg": "--config",
+        "default_paths": []
+      },
+      "config_rules": [
+        { "role": "data_dir",   "regex": "--store=(?:path=)?([^,\\s]+)" },
+        { "role": "write_path", "regex": "--log-dir=([^\\s]+)" },
+        { "role": "outbound_ip","regex": "--join=([^\\s]+)" },
+        { "role": "tls_cert",   "regex": "--certs-dir=([^\\s]+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "db_type": "tidb",
+      "executables": ["tidb-server"],
+      "default_ports": [4000, 10080],
+      "fd_signatures": [],
+      "cmdline_tokens": ["--store", "--path", "--config"],
+      "binary_strings": [],
+      "config_location": {
+        "cmdline_arg": "--config",
+        "default_paths": ["/etc/tidb/tidb.toml"]
+      },
+      "config_rules": [
+        { "role": "write_path", "regex": "^log-file\\s*=\\s*\\\"([^\\\"]+)\\\"" },
+        { "role": "outbound_ip","regex": "^pd-addr\\s*=\\s*\\\"([^\\\"]+)\\\"" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "db_type": "tikv",
+      "executables": ["tikv-server"],
+      "default_ports": [20160, 20180],
+      "fd_signatures": ["LOCK", "CURRENT", "IDENTITY"],
+      "cmdline_tokens": ["--config", "--data-dir"],
+      "binary_strings": [],
+      "config_location": {
+        "cmdline_arg": "--config",
+        "default_paths": ["/etc/tikv/tikv.toml"]
+      },
+      "config_rules": [
+        { "role": "data_dir",   "regex": "^data-dir\\s*=\\s*\\\"([^\\\"]+)\\\"" },
+        { "role": "write_path", "regex": "^log-file\\s*=\\s*\\\"([^\\\"]+)\\\"" },
+        { "role": "outbound_ip","regex": "^pd-endpoints\\s*=\\s*\\[([^\\]]+)\\]" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "db_type": "yugabytedb",
+      "executables": ["yb-tserver", "yb-master"],
+      "default_ports": [5433, 9042, 7100, 9100, 7000, 9000],
+      "fd_signatures": ["LOCK", "tablet-meta", "consensus-meta"],
+      "cmdline_tokens": ["--fs_data_dirs", "--rpc_bind_addresses"],
+      "binary_strings": [],
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["/home/yugabyte/tserver/conf/server.conf", "/home/yugabyte/master/conf/server.conf"]
+      },
+      "config_rules": [
+        { "role": "data_dir",   "regex": "--fs_data_dirs=([^\\s]+)" },
+        { "role": "outbound_ip","regex": "--tserver_master_addrs=([^\\s]+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "db_type": "meilisearch",
+      "executables": ["meilisearch"],
+      "default_ports": [7700],
+      "fd_signatures": ["data.ms", "meilisearch.pid"],
+      "cmdline_tokens": ["--db-path", "--http-addr", "--config-file-path"],
+      "binary_strings": [],
+      "config_location": {
+        "cmdline_arg": "--config-file-path",
+        "default_paths": ["/etc/meilisearch/config.toml"]
+      },
+      "config_rules": [
+        { "role": "data_dir",   "regex": "^db_path\\s*=\\s*\\\"([^\\\"]+)\\\"" },
+        { "role": "write_path", "regex": "^log_file_path\\s*=\\s*\\\"([^\\\"]+)\\\"" },
+        { "role": "write_path", "regex": "^dump_dir\\s*=\\s*\\\"([^\\\"]+)\\\"" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "db_type": "weaviate",
+      "executables": ["weaviate"],
+      "default_ports": [8080, 50051],
+      "fd_signatures": ["weaviate.pid", "segment.db"],
+      "cmdline_tokens": ["--config-file", "--port"],
+      "binary_strings": [],
+      "config_location": {
+        "cmdline_arg": "--config-file",
+        "default_paths": ["/etc/weaviate/weaviate.yaml"]
+      },
+      "config_rules": [
+        { "role": "data_dir",   "regex": "^persistence_data_path:\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "db_type": "qdrant",
+      "executables": ["qdrant"],
+      "default_ports": [6333, 6334],
+      "fd_signatures": ["qdrant.lock"],
+      "cmdline_tokens": ["--config-path", "--storage-path"],
+      "binary_strings": [],
+      "config_location": {
+        "cmdline_arg": "--config-path",
+        "default_paths": ["/etc/qdrant/config.yaml"]
+      },
+      "config_rules": [
+        { "role": "data_dir",   "regex": "^\\s*path:\\s*(.+)",           "section": "storage" },
+        { "role": "write_path", "regex": "^\\s*snapshots_path:\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "db_type": "arangodb",
+      "executables": ["arangod"],
+      "default_ports": [8529],
+      "fd_signatures": ["ENGINE", "LOCK"],
+      "cmdline_tokens": ["--database.directory", "--configuration"],
+      "binary_strings": [],
+      "config_location": {
+        "cmdline_arg": "--configuration",
+        "default_paths": ["/etc/arangodb3/arangod.conf"]
+      },
+      "config_rules": [
+        { "role": "data_dir",   "regex": "^directory\\s*=\\s*(.+)" },
+        { "role": "write_path", "regex": "^file\\s*=\\s*(.+)",            "section": "log" },
+        { "role": "outbound_ip","regex": "^endpoint\\s*=\\s*tcp://([^:]+)" }
+      ],
+      "complexity_indicators": ["foxx.queues"]
+    },
+    {
+      "db_type": "surrealdb",
+      "executables": ["surreal"],
+      "default_ports": [8000],
+      "fd_signatures": ["surreal.db", "surreal.lock"],
+      "cmdline_tokens": ["start", "--bind", "--log"],
+      "binary_strings": [],
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": []
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "db_type": "rethinkdb",
+      "executables": ["rethinkdb"],
+      "default_ports": [28015, 29015, 8080],
+      "fd_signatures": ["metadata", "rethinkdb_data"],
+      "cmdline_tokens": ["--directory", "-d", "--config-file"],
+      "binary_strings": [],
+      "config_location": {
+        "cmdline_arg": "--config-file",
+        "default_paths": ["/etc/rethinkdb/instances.d/default.conf"]
+      },
+      "config_rules": [
+        { "role": "data_dir",   "regex": "^directory=(.+)" },
+        { "role": "write_path", "regex": "^log-file=(.+)" },
+        { "role": "outbound_ip","regex": "^join=([\\d.a-zA-Z:-]+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "db_type": "milvus",
+      "executables": ["milvus"],
+      "default_ports": [19530, 9091, 2379],
+      "fd_signatures": ["milvus.yaml", "milvus.log"],
+      "cmdline_tokens": ["run", "standalone", "mixture"],
+      "binary_strings": [],
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["/milvus/configs/milvus.yaml", "/etc/milvus/milvus.yaml"]
+      },
+      "config_rules": [
+        { "role": "data_dir",   "regex": "^\\s*path:\\s*(.+)",            "section": "localStorage" },
+        { "role": "write_path", "regex": "^\\s*file:\\s*(.+)",            "section": "log" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "db_type": "qdrant",
+      "executables": ["qdrant"],
+      "default_ports": [6333, 6334],
+      "fd_signatures": ["qdrant_data"],
+      "cmdline_tokens": ["--config-path"],
+      "binary_strings": [],
+      "config_location": {
+        "cmdline_arg": "--config-path",
+        "default_paths": ["/etc/qdrant/config.yaml"]
+      },
+      "config_rules": [
+        { "role": "data_dir", "regex": "^\\s*storage:\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "db_type": "weaviate",
+      "executables": ["weaviate"],
+      "default_ports": [8080, 50051],
+      "fd_signatures": ["weaviate.db"],
+      "cmdline_tokens": ["--host"],
+      "binary_strings": [],
+      "config_location": {
+        "default_paths": []
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "db_type": "dragonfly",
+      "executables": ["dragonfly"],
+      "default_ports": [6379],
+      "fd_signatures": [],
+      "cmdline_tokens": ["--port"],
+      "binary_strings": [],
+      "config_location": {
+        "default_paths": []
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "db_type": "valkey",
+      "executables": ["valkey-server"],
+      "default_ports": [6379],
+      "fd_signatures": ["dump.rdb"],
+      "cmdline_tokens": ["--port"],
+      "binary_strings": [],
+      "config_location": {
+        "default_paths": ["/etc/valkey/valkey.conf"]
+      },
+      "config_rules": [
+        { "role": "data_dir", "regex": "^dir\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "db_type": "surrealdb",
+      "executables": ["surreal"],
+      "default_ports": [8000],
+      "fd_signatures": [],
+      "cmdline_tokens": ["start"],
+      "binary_strings": [],
+      "config_location": {
+        "default_paths": []
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    }
+  ]
+}

@@ -1,0 +1,229 @@
+{
+  "description": "Linux security infrastructure service signatures for auto-discovery, config-driven policy enforcement, and advisory alerting.",
+  "services": [
+    {
+      "service_type": "freeradius",
+      "executables": ["radiusd", "freeradius"],
+      "default_ports": [1812, 1813],
+      "unix_sockets": [],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": [
+          "/etc/freeradius/3.0/proxy.conf",
+          "/etc/freeradius/3.0/clients.conf",
+          "/etc/raddb/proxy.conf"
+        ]
+      },
+      "config_rules": [
+        { "role": "outbound_ip", "regex": "home_server\\s+[^{]*\\{[^}]*ipaddr\\s*=\\s*([\\d.]+)" },
+        { "role": "outbound_ip", "regex": "^\\s*ipaddr\\s*=\\s*([\\d.a-zA-Z:-]+)" },
+        { "role": "listen_port", "regex": "^\\s*port\\s*=\\s*(\\d+)" },
+        { "role": "tls_cert",    "regex": "^\\s*certificate_file\\s*=\\s*(.+)" },
+        { "role": "tls_cert",    "regex": "^\\s*private_key_file\\s*=\\s*(.+)" },
+        { "role": "exec_path",   "regex": "^\\s*program\\s*=\\s*(.+)" }
+      ],
+      "complexity_indicators": [
+        "mods-enabled/exec",
+        "rlm_exec",
+        "program = "
+      ]
+    },
+    {
+      "service_type": "oauth2-proxy",
+      "executables": ["oauth2-proxy"],
+      "default_ports": [4180],
+      "unix_sockets": [],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "--config",
+        "default_paths": [
+          "/etc/oauth2-proxy/oauth2-proxy.cfg",
+          "/etc/oauth2_proxy/oauth2_proxy.cfg"
+        ]
+      },
+      "config_rules": [
+        { "role": "outbound_ip", "regex": "--oidc-issuer-url[=\\s]+https?://([^/\\s]+)" },
+        { "role": "outbound_ip", "regex": "--upstream[=\\s]+https?://([^/\\s]+)" },
+        { "role": "outbound_ip", "regex": "^oidc_issuer_url\\s*=\\s*\"?https?://([^/\"\\s]+)" },
+        { "role": "outbound_ip", "regex": "^upstreams\\s*=\\s*\\[?\"?https?://([^/\"\\]\\s]+)" },
+        { "role": "listen_port", "regex": "--http-address[=\\s]+(?:[^:]+:)?(\\d+)" },
+        { "role": "listen_port", "regex": "^http_address\\s*=\\s*\"?[^:]*:(\\d+)" },
+        { "role": "tls_cert",    "regex": "--tls-cert-file[=\\s]+(.+)" },
+        { "role": "tls_cert",    "regex": "--tls-key-file[=\\s]+(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "tailscale",
+      "executables": ["tailscaled"],
+      "default_ports": [41641],
+      "unix_sockets": ["/run/tailscale/tailscaled.sock"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "--statedir",
+        "default_paths": [
+          "/var/lib/tailscale/tailscaled.state"
+        ]
+      },
+      "config_rules": [
+        { "role": "outbound_ip", "regex": "\"LoginName\"\\s*:\\s*\"([^\"]+)\"" },
+        { "role": "outbound_ip", "regex": "\"ControlURL\"\\s*:\\s*\"https?://([^/\"]+)" },
+        { "role": "outbound_ip", "regex": "\"ExitNodeIP\"\\s*:\\s*\"([\\d.a-fA-F:]+)\"" },
+        { "role": "read_path",   "regex": "\"StateFilePath\"\\s*:\\s*\"([^\"]+)\"" }
+      ],
+      "complexity_indicators": [
+        "\"ExitNodeIP\""
+      ]
+    },
+    {
+      "service_type": "fail2ban",
+      "executables": ["fail2ban-server"],
+      "default_ports": [],
+      "unix_sockets": ["/var/run/fail2ban/fail2ban.sock"],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": "-c",
+        "default_paths": [
+          "/etc/fail2ban/jail.conf",
+          "/etc/fail2ban/jail.local"
+        ]
+      },
+      "config_rules": [
+        { "role": "exec_path",   "regex": "^\\s*actionban\\s*=\\s*(.+)" },
+        { "role": "exec_path",   "regex": "^\\s*actionunban\\s*=\\s*(.+)" },
+        { "role": "exec_path",   "regex": "^\\s*actionstart\\s*=\\s*(.+)" },
+        { "role": "exec_path",   "regex": "^\\s*actionstop\\s*=\\s*(.+)" },
+        { "role": "read_path",   "regex": "^\\s*logpath\\s*=\\s*(.+)" },
+        { "role": "spool_dir",   "regex": "^\\s*dbfile\\s*=\\s*(.+)" }
+      ],
+      "complexity_indicators": [
+        "actionban = /",
+        "actionunban = /",
+        "actionstart = /",
+        "actionstop = /"
+      ],
+      "alert_message": "Fail2Ban detected with custom banaction scripts outside standard paths. Not fully protected. Manual graining required."
+    },
+    {
+      "service_type": "openvpn",
+      "executables": ["openvpn"],
+      "default_ports": [1194],
+      "unix_sockets": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": "--config",
+        "default_paths": [
+          "/etc/openvpn/server.conf",
+          "/etc/openvpn/client.conf",
+          "/etc/openvpn"
+        ]
+      },
+      "config_rules": [
+        { "role": "outbound_ip", "regex": "^\\s*remote\\s+([\\d.a-zA-Z:-]+)\\s" },
+        { "role": "listen_port", "regex": "^\\s*port\\s+(\\d+)" },
+        { "role": "exec_path",   "regex": "^\\s*up\\s+(.+)" },
+        { "role": "exec_path",   "regex": "^\\s*down\\s+(.+)" },
+        { "role": "exec_path",   "regex": "^\\s*route-up\\s+(.+)" },
+        { "role": "exec_path",   "regex": "^\\s*tls-verify\\s+(.+)" },
+        { "role": "tls_cert",    "regex": "^\\s*cert\\s+(.+)" },
+        { "role": "tls_cert",    "regex": "^\\s*key\\s+(.+)" },
+        { "role": "tls_cert",    "regex": "^\\s*ca\\s+(.+)" },
+        { "role": "write_path",  "regex": "^\\s*log\\s+(.+)" },
+        { "role": "write_path",  "regex": "^\\s*status\\s+(.+)" }
+      ],
+      "complexity_indicators": [
+        "up ",
+        "down ",
+        "route-up ",
+        "tls-verify "
+      ]
+    },
+    {
+      "service_type": "strongswan",
+      "executables": ["charon", "charon-systemd"],
+      "default_ports": [500, 4500],
+      "unix_sockets": ["/var/run/charon.ctl", "/var/run/charon.vici"],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": [
+          "/etc/ipsec.conf",
+          "/etc/swanctl/swanctl.conf",
+          "/etc/strongswan.conf"
+        ]
+      },
+      "config_rules": [
+        { "role": "outbound_ip",  "regex": "^\\s*right\\s*=\\s*([\\d.a-zA-Z%:-]+)" },
+        { "role": "outbound_ip",  "regex": "^\\s*left\\s*=\\s*([\\d.a-zA-Z%:-]+)" },
+        { "role": "outbound_ip",  "regex": "remote_addrs\\s*=\\s*([\\d.a-zA-Z,\\s:-]+)" },
+        { "role": "cluster_peer", "regex": "^\\s*right\\s*=\\s*([\\d.a-zA-Z:-]+)" },
+        { "role": "exec_path",    "regex": "^\\s*leftupdown\\s*=\\s*(.+)" },
+        { "role": "exec_path",    "regex": "^\\s*rightupdown\\s*=\\s*(.+)" },
+        { "role": "tls_cert",     "regex": "^\\s*leftcert\\s*=\\s*(.+)" },
+        { "role": "tls_cert",     "regex": "^\\s*rightcert\\s*=\\s*(.+)" },
+        { "role": "tls_cert",     "regex": "file\\s*=\\s*(.+\\.pem)" },
+        { "role": "read_path",    "regex": "^\\s*leftsourceip\\s*=\\s*(.+)" }
+      ],
+      "complexity_indicators": [
+        "leftupdown",
+        "rightupdown"
+      ]
+    },
+    {
+      "service_type": "keycloak",
+      "executables": ["java"],
+      "default_ports": [8080, 8443],
+      "unix_sockets": [],
+      "assigned_profile": "unprotected-rat",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": [
+          "/opt/keycloak/conf/keycloak.conf",
+          "/opt/keycloak/conf/quarkus.properties",
+          "/etc/keycloak/keycloak.conf"
+        ]
+      },
+      "config_rules": [
+        { "role": "listen_port", "regex": "^http-port\\s*=\\s*(\\d+)" },
+        { "role": "listen_port", "regex": "^https-port\\s*=\\s*(\\d+)" },
+        { "role": "outbound_ip", "regex": "^db-url-host\\s*=\\s*([\\d.a-zA-Z:-]+)" },
+        { "role": "outbound_ip", "regex": "^hostname\\s*=\\s*([\\d.a-zA-Z:-]+)" },
+        { "role": "tls_cert",    "regex": "^https-certificate-file\\s*=\\s*(.+)" },
+        { "role": "tls_cert",    "regex": "^https-certificate-key-file\\s*=\\s*(.+)" },
+        { "role": "read_path",   "regex": "^cache-config-file\\s*=\\s*(.+)" }
+      ],
+      "exposure_indicators": [
+        "hostname-strict=false",
+        "http-enabled=true",
+        "proxy=none"
+      ]
+    },
+    {
+      "service_type": "wireguard",
+      "executables": [],
+      "default_ports": [],
+      "unix_sockets": [],
+      "assigned_profile": "unprotected-rat",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": [
+          "/etc/wireguard"
+        ]
+      },
+      "config_rules": [
+        { "role": "outbound_ip", "regex": "^\\s*Endpoint\\s*=\\s*([\\d.a-zA-Z:-]+):\\d+" },
+        { "role": "outbound_ip", "regex": "^\\s*Address\\s*=\\s*([\\d./a-fA-F:]+)" },
+        { "role": "listen_port", "regex": "^\\s*ListenPort\\s*=\\s*(\\d+)" },
+        { "role": "tls_cert",    "regex": "^\\s*PrivateKey\\s*=\\s*(.+)" },
+        { "role": "read_path",   "regex": "^\\s*AllowedIPs\\s*=\\s*(.+)" }
+      ],
+      "exposure_indicators": [
+        "AllowedIPs = 0.0.0.0/0",
+        "AllowedIPs = ::/0",
+        "AllowedIPs=0.0.0.0/0",
+        "AllowedIPs=::/0"
+      ]
+    }
+  ]
+}

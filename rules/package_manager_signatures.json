@@ -1,0 +1,26 @@
+{
+  "description": "Package-manager executables tracked by vandam's Supply Chain pipeline. 'project' scope entries are resolved against the nearest manifest_file walking up from the invoking process's cwd (a project-scoped install); if no manifest is found (e.g. a global/--user install) or the install_subcommands match a global_flag, the activity is bucketed as system-wide instead of dropped. 'system' scope entries (OS distro package managers) are always system-wide, no manifest resolution attempted. ecosystem matches OSV.dev's ecosystem naming so vandam-pro's cloud OSV lookup can reuse the same field without a translation table; ecosystems OSV doesn't cover (e.g. pacman/Arch) are still tracked behaviorally, just never resolve real CVEs.",
+  "managers": [
+    { "executable": "npm", "scope": "project", "ecosystem": "npm", "install_subcommands": ["install", "i", "add", "ci", "update"], "manifest_file": "package.json", "lockfile": "package-lock.json", "global_flags": ["-g", "--global"] },
+    { "executable": "yarn", "scope": "project", "ecosystem": "npm", "install_subcommands": ["install", "add", "up", "upgrade"], "manifest_file": "package.json", "lockfile": "yarn.lock", "global_flags": ["global"] },
+    { "executable": "pnpm", "scope": "project", "ecosystem": "npm", "install_subcommands": ["install", "i", "add", "up", "update"], "manifest_file": "package.json", "lockfile": "pnpm-lock.yaml", "global_flags": ["-g", "--global"] },
+    { "executable": "pip", "scope": "project", "ecosystem": "PyPI", "install_subcommands": ["install"], "manifest_file": "requirements.txt", "lockfile": null, "global_flags": ["--user"] },
+    { "executable": "pip3", "scope": "project", "ecosystem": "PyPI", "install_subcommands": ["install"], "manifest_file": "requirements.txt", "lockfile": null, "global_flags": ["--user"] },
+    { "executable": "poetry", "scope": "project", "ecosystem": "PyPI", "install_subcommands": ["install", "add", "update"], "manifest_file": "pyproject.toml", "lockfile": "poetry.lock", "global_flags": [] },
+    { "executable": "pipenv", "scope": "project", "ecosystem": "PyPI", "install_subcommands": ["install", "update"], "manifest_file": "Pipfile", "lockfile": "Pipfile.lock", "global_flags": [] },
+    { "executable": "composer", "scope": "project", "ecosystem": "Packagist", "install_subcommands": ["install", "require", "update"], "manifest_file": "composer.json", "lockfile": "composer.lock", "global_flags": ["global"] },
+    { "executable": "cargo", "scope": "project", "ecosystem": "crates.io", "install_subcommands": ["install", "add", "update"], "manifest_file": "Cargo.toml", "lockfile": "Cargo.lock", "global_flags": [] },
+    { "executable": "gem", "scope": "project", "ecosystem": "RubyGems", "install_subcommands": ["install"], "manifest_file": "Gemfile", "lockfile": "Gemfile.lock", "global_flags": [] },
+    { "executable": "bundle", "scope": "project", "ecosystem": "RubyGems", "install_subcommands": ["install", "update"], "manifest_file": "Gemfile", "lockfile": "Gemfile.lock", "global_flags": [] },
+    { "executable": "go", "scope": "project", "ecosystem": "Go", "install_subcommands": ["install", "get"], "manifest_file": "go.mod", "lockfile": "go.sum", "global_flags": [] },
+
+    { "executable": "dpkg", "scope": "system", "ecosystem": "Debian", "install_subcommands": ["-i", "--install"], "manifest_file": null, "lockfile": null, "global_flags": [] },
+    { "executable": "apt", "scope": "system", "ecosystem": "Debian", "install_subcommands": ["install", "upgrade", "full-upgrade"], "manifest_file": null, "lockfile": null, "global_flags": [] },
+    { "executable": "apt-get", "scope": "system", "ecosystem": "Debian", "install_subcommands": ["install", "upgrade", "dist-upgrade"], "manifest_file": null, "lockfile": null, "global_flags": [] },
+    { "executable": "rpm", "scope": "system", "ecosystem": "Red Hat", "install_subcommands": ["-i", "--install", "-U", "--upgrade"], "manifest_file": null, "lockfile": null, "global_flags": [] },
+    { "executable": "yum", "scope": "system", "ecosystem": "Red Hat", "install_subcommands": ["install", "update", "upgrade"], "manifest_file": null, "lockfile": null, "global_flags": [] },
+    { "executable": "dnf", "scope": "system", "ecosystem": "Red Hat", "install_subcommands": ["install", "update", "upgrade"], "manifest_file": null, "lockfile": null, "global_flags": [] },
+    { "executable": "apk", "scope": "system", "ecosystem": "Alpine", "install_subcommands": ["add", "upgrade"], "manifest_file": null, "lockfile": null, "global_flags": [] },
+    { "executable": "pacman", "scope": "system", "ecosystem": null, "install_subcommands": ["-S", "-U", "-Syu"], "manifest_file": null, "lockfile": null, "global_flags": [] }
+  ]
+}

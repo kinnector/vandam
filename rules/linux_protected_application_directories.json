@@ -1,0 +1,7 @@
+{
+  "description": "Mapping of protected application directories to the keywords allowed in their writing processes' executable path on Linux.",
+  "directories": {
+    "google-chrome": "chrome",
+    "exodus": "exodus"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "sensitive_files": [
+    {
+      "path": "/.config/claude/",
+      "category": "ai_agents"
+    },
+    {
+      "path": "/.config/agy/",
+      "category": "ai_agents"
+    },
+    {
+      "path": "/.gemini/antigravity-cli/",
+      "category": "ai_agents"
+    },
+    {
+      "path": "/.config/gemini/",
+      "category": "ai_agents"
+    },
+    {
+      "path": "/.config/opencode/",
+      "category": "ai_agents"
+    },
+    {
+      "path": "/.config/codex/",
+      "category": "ai_agents"
+    },
+    {
+      "path": "/.config/hermes/",
+      "category": "ai_agents"
+    },
+    {
+      "path": "/.config/claude-code/",
+      "category": "ai_agents"
+    },
+    {
+      "path": "/.claude/",
+      "category": "ai_agents"
+    }
+  ]
+}

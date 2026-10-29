@@ -1,0 +1,242 @@
+{
+  "description": "Core Linux Remote Access Tools (RATs) and management signatures for auto-discovery and risk-alerting.",
+  "services": [
+    {
+      "service_type": "telnet",
+      "executables": ["in.telnetd", "telnetd"],
+      "default_ports": [23],
+      "fd_signatures": [],
+      "cmdline_tokens": ["telnetd"],
+      "binary_strings": ["telnetd"],
+      "assigned_profile": "unprotected-rat",
+      "config_location": null,
+      "config_rules": [],
+      "exposure_indicators": []
+    },
+    {
+      "service_type": "vnc",
+      "executables": ["Xvnc", "tigervnc"],
+      "default_ports": [5900, 5901, 5902],
+      "fd_signatures": [],
+      "cmdline_tokens": ["Xvnc", "vncserver"],
+      "binary_strings": ["Xvnc"],
+      "assigned_profile": "unprotected-rat",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["/etc/vnc.conf", "/home/user/.vnc/config"]
+      },
+      "config_rules": [
+        { "role": "listen_address", "regex": "-localhost\\s+(no)" }
+      ],
+      "exposure_indicators": ["-localhost no"]
+    },
+    {
+      "service_type": "xrdp",
+      "executables": ["xrdp", "xrdp-sesman"],
+      "default_ports": [3389],
+      "fd_signatures": ["xrdp.ini"],
+      "cmdline_tokens": ["xrdp"],
+      "binary_strings": ["xrdp"],
+      "assigned_profile": "unprotected-rat",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["/etc/xrdp/xrdp.ini"]
+      },
+      "config_rules": [
+        { "role": "listen_port", "regex": "^port=([^\\n]+)" }
+      ],
+      "exposure_indicators": ["port=3389"]
+    },
+    {
+      "service_type": "webmin",
+      "executables": ["miniserv.pl"],
+      "default_ports": [10000],
+      "fd_signatures": ["miniserv.conf"],
+      "cmdline_tokens": ["webmin"],
+      "binary_strings": ["miniserv"],
+      "assigned_profile": "unprotected-rat",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["/etc/webmin/miniserv.conf"]
+      },
+      "config_rules": [
+        { "role": "ssl_status", "regex": "^ssl=([0-9])" },
+        { "role": "listen_ip", "regex": "^listen=([^\\n]+)" }
+      ],
+      "exposure_indicators": ["ssl=0", "listen=0.0.0.0", "listen="]
+    },
+    {
+      "service_type": "cockpit",
+      "executables": ["cockpit-ws"],
+      "default_ports": [9090],
+      "fd_signatures": [],
+      "cmdline_tokens": ["cockpit-ws"],
+      "binary_strings": ["cockpit-ws"],
+      "assigned_profile": "unprotected-rat",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["/etc/cockpit/cockpit.conf"]
+      },
+      "config_rules": [
+        { "role": "listen_ip", "regex": "^Listen=([^\\n]+)" },
+        { "role": "allow_unencrypted", "regex": "^AllowUnencrypted\\s*=\\s*(true)" }
+      ],
+      "exposure_indicators": ["AllowUnencrypted=true"]
+    },
+    {
+      "service_type": "salt-minion",
+      "executables": ["salt-minion"],
+      "default_ports": [4505, 4506],
+      "fd_signatures": [],
+      "cmdline_tokens": ["salt-minion"],
+      "binary_strings": ["salt-minion"],
+      "assigned_profile": "unprotected-rat",
+      "config_location": {
+        "cmdline_arg": "-c",
+        "default_paths": ["/etc/salt/minion"]
+      },
+      "config_rules": [
+        { "role": "master_ip", "regex": "^master:\\s*([^\\n]+)" }
+      ],
+      "exposure_indicators": []
+    },
+    {
+      "service_type": "ansible-pull",
+      "executables": ["ansible-pull", "ansible"],
+      "default_ports": [],
+      "fd_signatures": [],
+      "cmdline_tokens": ["ansible-pull", "--playbook"],
+      "binary_strings": ["ansible-pull"],
+      "assigned_profile": "unprotected-rat",
+      "config_location": {
+        "cmdline_arg": "-i",
+        "default_paths": ["/etc/ansible/ansible.cfg", "/root/.ansible.cfg"]
+      },
+      "config_rules": [
+        { "role": "exec_path", "regex": "^remote_tmp\\s*=\\s*(.+)" },
+        { "role": "exec_path", "regex": "^local_tmp\\s*=\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "nebula",
+      "executables": ["nebula"],
+      "default_ports": [4242],
+      "fd_signatures": [],
+      "cmdline_tokens": ["-config"],
+      "binary_strings": ["nebula", "github.com/slackhq/nebula"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "-config",
+        "default_paths": ["/etc/nebula/config.yaml", "/etc/nebula/config.yml"]
+      },
+      "config_rules": [
+        { "role": "tls_cert",    "regex": "^\\s*cert:\\s*(.+)" },
+        { "role": "tls_cert",    "regex": "^\\s*key:\\s*(.+)" },
+        { "role": "outbound_ip", "regex": "lighthouse:\\s*\\n\\s*hosts:\\s*\\n\\s*-\\s*(.+)" }
+      ],
+      "exposure_indicators": []
+    },
+    {
+      "service_type": "zerotier",
+      "executables": ["zerotier-one"],
+      "default_ports": [9993],
+      "fd_signatures": ["identity.public", "identity.secret"],
+      "cmdline_tokens": [],
+      "binary_strings": ["ZeroTierOne", "zerotier"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["/var/lib/zerotier-one", "/Library/Application Support/ZeroTier/One"]
+      },
+      "config_rules": [],
+      "exposure_indicators": []
+    },
+    {
+      "service_type": "headscale",
+      "executables": ["headscale"],
+      "default_ports": [8080, 9090],
+      "fd_signatures": [],
+      "cmdline_tokens": ["--config", "serve"],
+      "binary_strings": ["headscale", "github.com/juanfont/headscale"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "--config",
+        "default_paths": ["/etc/headscale/config.yaml"]
+      },
+      "config_rules": [
+        { "role": "write_path", "regex": "^db_path:\\s*(.+)" },
+        { "role": "write_path", "regex": "^private_key_path:\\s*(.+)" }
+      ],
+      "exposure_indicators": []
+    },
+    {
+      "service_type": "teleport",
+      "executables": ["teleport"],
+      "default_ports": [3022, 3023, 3024, 3025, 3080],
+      "fd_signatures": [],
+      "cmdline_tokens": ["start", "--config"],
+      "binary_strings": ["Teleport", "gravitational/teleport"],
+      "assigned_profile": "unprotected-rat",
+      "config_location": {
+        "cmdline_arg": "--config",
+        "default_paths": ["/etc/teleport.yaml", "/etc/teleport/teleport.yaml"]
+      },
+      "config_rules": [
+        { "role": "write_path",  "regex": "^\\s*data_dir:\\s*(.+)" },
+        { "role": "outbound_ip", "regex": "^\\s*proxy_server:\\s*(.+)" }
+      ],
+      "exposure_indicators": []
+    },
+    {
+      "service_type": "boundary",
+      "executables": ["boundary"],
+      "default_ports": [9200, 9201, 9202],
+      "fd_signatures": [],
+      "cmdline_tokens": ["server", "-config"],
+      "binary_strings": ["boundary", "hashicorp/boundary"],
+      "assigned_profile": "unprotected-rat",
+      "config_location": {
+        "cmdline_arg": "-config",
+        "default_paths": ["/etc/boundary/boundary.hcl"]
+      },
+      "config_rules": [
+        { "role": "write_path",  "regex": "path\\s*=\\s*\"([^\"]+)\"" },
+        { "role": "outbound_ip", "regex": "address\\s*=\\s*\"([^\"]+)\"" }
+      ],
+      "exposure_indicators": []
+    },
+    {
+      "service_type": "rustdesk",
+      "executables": ["rustdesk", "hbbr", "hbbs"],
+      "default_ports": [21115, 21116, 21117, 21118, 21119],
+      "fd_signatures": [],
+      "cmdline_tokens": [],
+      "binary_strings": ["rustdesk", "RustDesk"],
+      "assigned_profile": "unprotected-rat",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["/etc/rustdesk", "/var/lib/rustdesk"]
+      },
+      "config_rules": [],
+      "exposure_indicators": []
+    },
+    {
+      "service_type": "nomachine-nx",
+      "executables": ["nxserver", "nxnode", "nxd"],
+      "default_ports": [4000],
+      "fd_signatures": [],
+      "cmdline_tokens": ["nxserver"],
+      "binary_strings": ["NoMachine", "nxserver"],
+      "assigned_profile": "unprotected-rat",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["/usr/NX/etc/server.cfg"]
+      },
+      "config_rules": [
+        { "role": "listen_port", "regex": "^NXPort\\s+(\\d+)" }
+      ],
+      "exposure_indicators": ["NXUseKeyAuthentication 0"]
+    }
+  ]
+}

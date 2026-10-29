@@ -1,0 +1,11 @@
+{
+  "description": "Package installer binaries and keywords monitored on Linux systems.",
+  "binaries": [
+    "npm", "yarn", "pnpm", "bun", "pip", "poetry", "pipenv", "composer", 
+    "cargo", "gem", "bundle", "nuget", "dotnet", "go", 
+    "gradle", "gradlew", "mvn", "sbt", "conan", "vcpkg", 
+    "cpan", "cpanm", "luarocks", "julia", "cabal", "stack", 
+    "brew", "snap", "apt", "apt-get", "dpkg", "yum", "dnf", 
+    "rpm", "pacman", "apk", "make", "cmake", "ninja"
+  ]
+}

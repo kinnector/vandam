@@ -1,0 +1,46 @@
+[package]
+name = "vandam-agent"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "vandam"
+path = "src/lib.rs"
+
+[[bin]]
+name = "vandamd"
+path = "src/main.rs"
+
+[dependencies]
+tokio = { version = "1", features = ["rt-multi-thread", "net", "io-util", "macros", "time", "sync", "process", "fs", "signal"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+clap = { version = "4.0", features = ["derive"] }
+nix = { version = "0.27", features = ["user"] }
+libc = "0.2"
+chrono = { version = "0.4", features = ["serde"] }
+notify = "6.1"
+reqwest = { version = "0.11", default-features = false, features = ["json", "multipart", "rustls-tls"] }
+dashmap = "5.5"
+semver = "1.0"
+uuid = { version = "1", features = ["v4"] }
+regex = "1.10"
+glob = "0.3"
+zstd = "0.13"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tonic = { version = "0.10", features = ["tls-webpki-roots"] }
+prost = "0.12"
+futures-core = "0.3"
+openssl = "0.10"
+axum = "0.8.9"
+tower = "0.5.3"
+hyper-util = "0.1.20"
+hyper = "1.10.1"
+async-trait = "0.1"
+base64 = "0.21"
+ed25519-dalek = { version = "2", default-features = false, features = ["std"] }
+sha2 = "0.10"
+
+[build-dependencies]
+tonic-build = "0.10"

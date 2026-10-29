@@ -1,0 +1,338 @@
+{
+  "description": "Core Linux infrastructure service signatures (DNS, LDAP, DHCP, Process managers) for host-native auto-discovery and config-driven policy enforcement.",
+  "services": [
+    {
+      "service_type": "bind",
+      "executables": ["named"],
+      "default_ports": [53],
+      "fd_signatures": ["named.conf", "session.key"],
+      "cmdline_tokens": ["-g", "-f", "-c"],
+      "binary_strings": ["named"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "-c",
+        "default_paths": ["/etc/named.conf", "/etc/bind/named.conf", "/etc/named/named.conf"]
+      },
+      "config_rules": [
+        { "role": "outbound_ip", "regex": "forwarders\\s*\\{([^}]+)\\}" },
+        { "role": "data_dir",    "regex": "directory\\s+\"([^\"]+)\"" },
+        { "role": "tls_cert",    "regex": "cert-file\\s+\"([^\"]+)\"" },
+        { "role": "tls_cert",    "regex": "key-file\\s+\"([^\"]+)\"" }
+      ],
+      "complexity_indicators": ["plugin", "dlz", "allow-update", "masters"]
+    },
+    {
+      "service_type": "dnsmasq",
+      "executables": ["dnsmasq"],
+      "default_ports": [53, 67],
+      "fd_signatures": ["dnsmasq.leases"],
+      "cmdline_tokens": ["--dhcp-leasefile", "--conf-file"],
+      "binary_strings": ["dnsmasq"],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": "--conf-file",
+        "default_paths": ["/etc/dnsmasq.conf"]
+      },
+      "config_rules": [
+        { "role": "outbound_ip", "regex": "^server=([^#\\n/]+)" },
+        { "role": "write_path",  "regex": "^dhcp-leasefile=([^#\\n]+)" },
+        { "role": "exec_path",   "regex": "^dhcp-script=([^#\\n]+)" },
+        { "role": "read_path",   "regex": "^conf-dir=([^#\\n,]+)" },
+        { "role": "read_path",   "regex": "^dhcp-hostsfile=([^#\\n]+)" }
+      ],
+      "complexity_indicators": ["dhcp-script=", "conf-dir=", "dhcp-hostsfile=", "dhcp-optsfile="]
+    },
+    {
+      "service_type": "systemd-resolved",
+      "executables": ["systemd-resolve"],
+      "default_ports": [53],
+      "fd_signatures": [],
+      "cmdline_tokens": [],
+      "binary_strings": ["systemd-resolved"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["/etc/systemd/resolved.conf"]
+      },
+      "config_rules": [
+        { "role": "outbound_ip", "regex": "^DNS=([^#\\n]+)" },
+        { "role": "tls_cert",    "regex": "^DNSOverTLSCertificate=([^#\\n]+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "openldap",
+      "executables": ["slapd"],
+      "default_ports": [389, 636],
+      "fd_signatures": ["DB_CONFIG", "alock", "data.mdb"],
+      "cmdline_tokens": ["-h", "-F", "-f"],
+      "binary_strings": ["slapd"],
+      "assigned_profile": "zero-network",
+      "config_location": {
+        "cmdline_arg": "-f",
+        "default_paths": ["/etc/ldap/slapd.conf", "/etc/openldap/slapd.conf"],
+        "cmdline_dir_arg": "-F",
+        "default_dir_paths": ["/etc/ldap/slapd.d", "/etc/openldap/slapd.d"]
+      },
+      "config_rules": [
+        { "role": "outbound_ip", "regex": "provider=ldap://([^/\\s]+)" },
+        { "role": "data_dir",    "regex": "olcDbDirectory:\\s+(.+)" },
+        { "role": "data_dir",    "regex": "^directory\\s+(.+)" },
+        { "role": "tls_cert",    "regex": "olcTLSCertificateFile:\\s+(.+)" },
+        { "role": "tls_cert",    "regex": "olcTLSCertificateKeyFile:\\s+(.+)" },
+        { "role": "tls_cert",    "regex": "^TLSCertificateFile\\s+(.+)" }
+      ],
+      "complexity_indicators": ["moduleload", "modulepath", "overlay back-perl", "overlay back-sql", "database sql", "database perl"]
+    },
+    {
+      "service_type": "freeipa",
+      "executables": ["ipa-otpd"],
+      "default_ports": [389, 636, 88],
+      "fd_signatures": [],
+      "cmdline_tokens": [],
+      "binary_strings": ["ipa-otpd"],
+      "assigned_profile": "zero-network",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["/etc/ipa/default.conf"]
+      },
+      "config_rules": [
+        { "role": "outbound_ip", "regex": "^server=([^#\\n]+)" },
+        { "role": "outbound_ip", "regex": "^xmlrpc_uri=https://([^/#\\n]+)" },
+        { "role": "read_path",   "regex": "^basedn=(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "kea-dhcp",
+      "executables": ["kea-dhcp4", "kea-dhcp6"],
+      "default_ports": [67, 547],
+      "fd_signatures": ["kea-dhcp4.conf", "kea-dhcp6.conf"],
+      "cmdline_tokens": ["-c"],
+      "binary_strings": ["kea"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "-c",
+        "default_paths": ["/etc/kea/kea-dhcp4.conf", "/etc/kea/kea-dhcp6.conf"]
+      },
+      "config_rules": [
+        { "role": "write_path",  "json_path": "Dhcp4.lease-database.name" },
+        { "role": "write_path",  "json_path": "Dhcp6.lease-database.name" },
+        { "role": "outbound_ip", "json_path": "Dhcp4.hosts-database.host" },
+        { "role": "tls_cert",    "json_path": "Dhcp4.control-socket" }
+      ],
+      "complexity_indicators": [],
+      "complexity_indicators_json": ["hooks-libraries", "hosts-database", "config-databases"]
+    },
+    {
+      "service_type": "powerdns-auth",
+      "executables": ["pdns_server"],
+      "default_ports": [53],
+      "fd_signatures": [],
+      "cmdline_tokens": [],
+      "binary_strings": ["pdns_server"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "--config-name=",
+        "default_paths": ["/etc/powerdns/pdns.conf"]
+      },
+      "config_rules": [
+        { "role": "listen_port", "regex": "^\\s*local-port=(\\d+)" }
+      ],
+      "complexity_indicators": ["launch=pipe", "launch=remote"]
+    },
+    {
+      "service_type": "supervisord",
+      "executables": ["python", "python3", "supervisord"],
+      "default_ports": [],
+      "fd_signatures": [],
+      "cmdline_tokens": ["supervisord"],
+      "binary_strings": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": "-c",
+        "default_paths": ["/etc/supervisor/supervisord.conf", "/etc/supervisord.conf"]
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "ntp-client",
+      "executables": ["chronyd", "ntpd"],
+      "default_ports": [123],
+      "fd_signatures": [],
+      "cmdline_tokens": ["-f", "-u", "-g"],
+      "binary_strings": ["chronyd", "ntpd"],
+      "assigned_profile": "zero-network-ntp-client",
+      "config_location": {
+        "cmdline_arg": "-f",
+        "default_paths": ["/etc/chrony/chrony.conf", "/etc/chrony.conf", "/etc/ntp.conf"]
+      },
+      "config_rules": [
+        { "role": "outbound_ip", "regex": "^server\\s+([^\\s]+)" },
+        { "role": "outbound_ip", "regex": "^pool\\s+([^\\s]+)" },
+        { "role": "read_path", "regex": "^driftfile\\s+([^\\s]+)" },
+        { "role": "read_path", "regex": "^pidfile\\s+([^\\s]+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "nomad",
+      "executables": ["nomad"],
+      "default_ports": [4646, 4647, 4648],
+      "fd_signatures": [],
+      "cmdline_tokens": ["agent", "-config"],
+      "binary_strings": ["Nomad", "hashicorp/nomad"],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": "-config",
+        "default_paths": ["/etc/nomad.d/nomad.hcl", "/etc/nomad/nomad.hcl"]
+      },
+      "config_rules": [
+        { "role": "write_path",  "regex": "data_dir\\s*=\\s*\"([^\"]+)\"" },
+        { "role": "outbound_ip", "regex": "retry_join\\s*=\\s*\\[([^\\]]+)\\]" }
+      ],
+      "complexity_indicators": ["driver = \"exec\"", "driver = \"raw_exec\"", "driver = \"java\""]
+    },
+    {
+      "service_type": "serf",
+      "executables": ["serf"],
+      "default_ports": [7946],
+      "fd_signatures": [],
+      "cmdline_tokens": ["agent", "-config-file"],
+      "binary_strings": ["Serf", "hashicorp/serf"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "-config-file",
+        "default_paths": ["/etc/serf/config.json"]
+      },
+      "config_rules": [
+        { "role": "outbound_ip", "json_path": "start_join" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "jaeger",
+      "executables": ["jaeger-all-in-one", "jaeger-collector", "jaeger-agent", "jaeger-query"],
+      "default_ports": [14250, 14268, 6831, 16686],
+      "fd_signatures": [],
+      "cmdline_tokens": [],
+      "binary_strings": ["Jaeger", "jaeger-all-in-one"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "--config-file",
+        "default_paths": []
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "otelcol",
+      "executables": ["otelcol", "otelcol-contrib", "otelcol-custom"],
+      "default_ports": [4317, 4318, 55679],
+      "fd_signatures": [],
+      "cmdline_tokens": ["--config"],
+      "binary_strings": ["otelcol", "opentelemetry-collector"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "--config",
+        "default_paths": ["/etc/otelcol/config.yaml", "/etc/otelcol-contrib/config.yaml"]
+      },
+      "config_rules": [
+        { "role": "outbound_ip", "regex": "endpoint:\\s*([\\d.a-zA-Z:-]+)" }
+      ],
+      "complexity_indicators": ["extensions/opa", "processors/script"]
+    },
+    {
+      "service_type": "vector",
+      "executables": ["vector"],
+      "default_ports": [8686, 9000],
+      "fd_signatures": [],
+      "cmdline_tokens": ["--config"],
+      "binary_strings": ["Vector", "timber-io/vector"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "--config",
+        "default_paths": ["/etc/vector/vector.toml", "/etc/vector/vector.yaml"]
+      },
+      "config_rules": [
+        { "role": "write_path",  "regex": "^\\s*path\\s*=\\s*\"([^\"]+)\"" },
+        { "role": "outbound_ip", "regex": "endpoint\\s*=\\s*\"([^\"]+)\"" }
+      ],
+      "complexity_indicators": ["type = \"exec\"", "type = \"lua\""]
+    },
+    {
+      "service_type": "tempo",
+      "executables": ["tempo"],
+      "default_ports": [3200, 9411, 14268, 4317],
+      "fd_signatures": [],
+      "cmdline_tokens": ["-config.file"],
+      "binary_strings": ["tempo", "grafana/tempo"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "-config.file",
+        "default_paths": ["/etc/tempo/tempo.yaml"]
+      },
+      "config_rules": [
+        { "role": "write_path", "regex": "path:\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "kong",
+      "executables": ["kong", "openresty"],
+      "default_ports": [8000, 8001, 8443, 8444],
+      "fd_signatures": [],
+      "cmdline_tokens": ["kong", "start"],
+      "binary_strings": ["Kong", "kong-gateway"],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["/etc/kong/kong.conf", "/etc/kong/kong.yml"]
+      },
+      "config_rules": [
+        { "role": "write_path",  "regex": "^prefix\\s*=\\s*(.+)" },
+        { "role": "outbound_ip", "regex": "^pg_host\\s*=\\s*(.+)" },
+        { "role": "outbound_ip", "regex": "^cassandra_contact_points\\s*=\\s*(.+)" }
+      ],
+      "complexity_indicators": ["lua_package_path", "nginx_http_lua"]
+    },
+    {
+      "service_type": "keepalived",
+      "executables": ["keepalived"],
+      "default_ports": [112],
+      "fd_signatures": ["keepalived.conf"],
+      "cmdline_tokens": ["-f", "-D"],
+      "binary_strings": ["keepalived"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "-f",
+        "default_paths": ["/etc/keepalived/keepalived.conf"]
+      },
+      "config_rules": [
+        { "role": "outbound_ip", "regex": "notification_email_from\\s+(.+)" },
+        { "role": "exec_path",   "regex": "notify_master\\s+\"([^\"]+)\"" },
+        { "role": "exec_path",   "regex": "notify_backup\\s+\"([^\"]+)\"" },
+        { "role": "exec_path",   "regex": "notify_fault\\s+\"([^\"]+)\"" }
+      ],
+      "complexity_indicators": ["notify_master", "notify_backup", "notify_fault"]
+    },
+    {
+      "service_type": "corosync",
+      "executables": ["corosync", "crmd", "pacemaker-based"],
+      "default_ports": [5404, 5405],
+      "fd_signatures": ["corosync.conf"],
+      "cmdline_tokens": ["-f", "-c"],
+      "binary_strings": ["corosync", "pacemaker"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "-f",
+        "default_paths": ["/etc/corosync/corosync.conf"]
+      },
+      "config_rules": [
+        { "role": "outbound_ip", "regex": "bindnetaddr:\\s*([\\d.]+)" }
+      ],
+      "complexity_indicators": []
+    }
+  ]
+}

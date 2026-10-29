@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "exclusions": [
+    "/tmp/exclude",
+    "/var/log/",
+    "/sys/",
+    "/proc/",
+    "/dev/"
+  ],
+  "trusted_clis": [
+    {
+      "path": "/usr/bin/ssh",
+      "category": "ssh"
+    },
+    {
+      "path": "/usr/bin/scp",
+      "category": "ssh"
+    }
+  ],
+  "sensitive_files": [
+    {
+      "path": "/etc/passwd",
+      "category": "ssh"
+    },
+    {
+      "path": "/etc/shadow",
+      "category": "ssh"
+    },
+    {
+      "path": "/etc/sudoers",
+      "category": "ssh"
+    },
+    {
+      "path": "/.ssh/",
+      "category": "ssh"
+    }
+  ]
+}

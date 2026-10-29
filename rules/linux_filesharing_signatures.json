@@ -1,0 +1,104 @@
+{
+  "description": "Core Linux file sharing and storage service signatures for host-native auto-discovery and config-driven policy enforcement.",
+  "services": [
+    {
+      "service_type": "samba",
+      "executables": ["smbd", "nmbd"],
+      "default_ports": [445, 139],
+      "fd_signatures": ["smb.conf"],
+      "cmdline_tokens": ["smbd", "-D"],
+      "binary_strings": ["smbd"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "-s",
+        "default_paths": ["/etc/samba/smb.conf"]
+      },
+      "config_rules": [
+        { "role": "write_path",  "regex": "^\\s*path\\s*=\\s*(.+)" },
+        { "role": "exec_path",   "regex": "^\\s*preexec\\s*=\\s*(.+)" },
+        { "role": "exec_path",   "regex": "^\\s*postexec\\s*=\\s*(.+)" },
+        { "role": "exec_path",   "regex": "^\\s*print command\\s*=\\s*(.+)" }
+      ],
+      "complexity_indicators": [
+        "preexec",
+        "postexec",
+        "print command",
+        "add user script",
+        "add machine script"
+      ]
+    },
+    {
+      "service_type": "nfs",
+      "executables": ["nfsd", "rpc.mountd"],
+      "default_ports": [2049],
+      "fd_signatures": ["exports"],
+      "cmdline_tokens": [],
+      "binary_strings": [],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["/etc/exports"]
+      },
+      "config_rules": [
+        { "role": "write_path",  "regex": "^\\s*(\\/[^\\s]+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "vsftpd",
+      "executables": ["vsftpd"],
+      "default_ports": [20, 21],
+      "fd_signatures": ["vsftpd.conf"],
+      "cmdline_tokens": [],
+      "binary_strings": ["vsftpd"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["/etc/vsftpd.conf", "/etc/vsftpd/vsftpd.conf"]
+      },
+      "config_rules": [
+        { "role": "write_path",  "regex": "^local_root\\s*=\\s*(.+)" },
+        { "role": "write_path",  "regex": "^anon_root\\s*=\\s*(.+)" },
+        { "role": "read_path",   "regex": "^secure_chroot_dir\\s*=\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "proftpd",
+      "executables": ["proftpd"],
+      "default_ports": [21],
+      "fd_signatures": ["proftpd.conf"],
+      "cmdline_tokens": [],
+      "binary_strings": ["ProFTPD"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "-c",
+        "default_paths": ["/etc/proftpd/proftpd.conf", "/etc/proftpd.conf"]
+      },
+      "config_rules": [
+        { "role": "write_path",  "regex": "DefaultRoot\\s+([^\\s]+)" }
+      ],
+      "complexity_indicators": [
+        "ExecEngine",
+        "mod_exec"
+      ]
+    },
+    {
+      "service_type": "rsync",
+      "executables": ["rsync"],
+      "default_ports": [873],
+      "fd_signatures": ["rsyncd.conf"],
+      "cmdline_tokens": ["--daemon"],
+      "binary_strings": [],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "--config",
+        "default_paths": ["/etc/rsyncd.conf"]
+      },
+      "config_rules": [
+        { "role": "write_path",  "regex": "^\\s*path\\s*=\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    }
+  ]
+}

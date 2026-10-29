@@ -1,0 +1,8 @@
+{
+  "description": "Command line signatures for shells/RCE on Linux.",
+  "patterns": [
+    "wget ", "curl ", "nc ", "netcat", "ncat", "bash -i", "/dev/tcp/", "/dev/udp/",
+    "python -c", "python3 -c", "perl -e", "ruby -e", "php -r", "base64 -d",
+    "chmod +x", "chmod 777", "mkfifo", "LD_PRELOAD"
+  ]
+}

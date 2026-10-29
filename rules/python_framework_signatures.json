@@ -1,0 +1,126 @@
+{
+  "description": "Storage discovery rules for Python web frameworks and WSGI/ASGI servers. All .env path scanning is delegated to scan_process_env_for_storage (Pillar 3) for live processes — no .env anchors here. Generic catchall rules removed; only anchors that uniquely identify a framework are present.",
+  "frameworks": [
+    {
+      "name": "Django",
+      "rules": [
+        {
+          "file_name": "manage.py",
+          "relative_path": "media",
+          "role": "UploadDirectory",
+          "confidence": "High",
+          "known_allow_dirs": [
+            "media",
+            "staticfiles",
+            "static",
+            "logs",
+            "tmp"
+          ]
+        },
+        { "file_name": "manage.py",   "relative_path": "staticfiles", "role": "AppStorage",  "confidence": "High",   "known_allow_dirs": [] },
+        { "file_name": "manage.py",   "relative_path": "logs",        "role": "AppStorage",  "confidence": "Medium", "known_allow_dirs": [] },
+        { "file_name": "settings.py", "key_regex": "MEDIA_ROOT\\s*=\\s*['\"]([^'\"]+)['\"]",           "role": "UploadDirectory", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "settings.py", "key_regex": "STATIC_ROOT\\s*=\\s*['\"]([^'\"]+)['\"]",          "role": "AppStorage",      "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "settings.py", "key_regex": "FILE_UPLOAD_TEMP_DIR\\s*=\\s*['\"]([^'\"]+)['\"]", "role": "TempDirectory",   "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "settings.py", "key_regex": "SESSION_FILE_PATH\\s*=\\s*['\"]([^'\"]+)['\"]",    "role": "SessionStorage",  "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "settings.py", "key_regex": "'LOCATION':\\s*['\"]([^'\"]+)['\"]",               "role": "CompiledCache",   "confidence": "Medium", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "Flask",
+      "rules": [
+        {
+          "file_name": "wsgi.py",
+          "relative_path": "uploads",
+          "role": "UploadDirectory",
+          "confidence": "Medium",
+          "known_allow_dirs": [
+            "uploads",
+            "instance",
+            "static",
+            "logs"
+          ]
+        },
+        { "file_name": "wsgi.py",   "relative_path": "instance",                                      "role": "AppStorage",     "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "wsgi.py",   "key_regex": "UPLOAD_FOLDER\\s*=\\s*['\"]([^'\"]+)['\"]",         "role": "UploadDirectory","confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "wsgi.py",   "key_regex": "SESSION_FILE_DIR\\s*=\\s*['\"]([^'\"]+)['\"]",      "role": "SessionStorage", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": ".flaskenv", "key_regex": "UPLOAD_FOLDER\\s*=\\s*([^\\s#]+)",                  "role": "UploadDirectory","confidence": "High", "known_allow_dirs": [] },
+        { "file_name": ".flaskenv", "key_regex": "SESSION_FILE_DIR\\s*=\\s*([^\\s#]+)",               "role": "SessionStorage", "confidence": "High", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "FastAPI",
+      "rules": [
+        {
+          "file_name": "main.py",
+          "relative_path": "uploads",
+          "role": "UploadDirectory",
+          "confidence": "Medium",
+          "known_allow_dirs": [
+            "uploads",
+            "static",
+            "media",
+            "files"
+          ]
+        },
+        { "file_name": "main.py", "relative_path": "static",                                                 "role": "AppStorage",      "confidence": "Medium", "known_allow_dirs": [] },
+        { "file_name": "main.py", "key_regex": "StaticFiles\\(.*?directory=['\"]([^'\"]+)['\"]",             "role": "AppStorage",      "confidence": "High",   "known_allow_dirs": [] },
+        { "file_name": "main.py", "key_regex": "UPLOAD_DIR\\s*=\\s*['\"]([^'\"]+)['\"]",                    "role": "UploadDirectory", "confidence": "High",   "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "Celery",
+      "rules": [
+        { "file_name": "celery.py",       "key_regex": "result_backend\\s*=\\s*['\"]([^'\"]+)['\"]",         "role": "AppStorage", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "celery.py",       "key_regex": "data_folder_processed\\s*=\\s*['\"]([^'\"]+)['\"]",  "role": "AppStorage", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "celeryconfig.py", "key_regex": "CELERY_RESULT_BACKEND\\s*=\\s*['\"]([^'\"]+)['\"]",  "role": "AppStorage", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "celeryconfig.py", "key_regex": "result_backend\\s*=\\s*['\"]([^'\"]+)['\"]",         "role": "AppStorage", "confidence": "High", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "Pyramid",
+      "rules": [
+        { "file_name": "development.ini", "key_regex": "session\\.data_dir\\s*=\\s*(.+)", "role": "SessionStorage",  "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "development.ini", "key_regex": "session\\.lock_dir\\s*=\\s*(.+)", "role": "TempDirectory",   "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "development.ini", "key_regex": "upload_dir\\s*=\\s*(.+)",         "role": "UploadDirectory", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "production.ini",  "key_regex": "session\\.data_dir\\s*=\\s*(.+)", "role": "SessionStorage",  "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "production.ini",  "key_regex": "session\\.lock_dir\\s*=\\s*(.+)", "role": "TempDirectory",   "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "production.ini",  "key_regex": "upload_dir\\s*=\\s*(.+)",         "role": "UploadDirectory", "confidence": "High", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "Gunicorn",
+      "rules": [
+        { "file_name": "gunicorn.conf.py", "key_regex": "errorlog\\s*=\\s*['\"]([^'\"]+)['\"]",       "role": "AppStorage",    "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "gunicorn.conf.py", "key_regex": "accesslog\\s*=\\s*['\"]([^'\"]+)['\"]",      "role": "AppStorage",    "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "gunicorn.conf.py", "key_regex": "worker_tmp_dir\\s*=\\s*['\"]([^'\"]+)['\"]", "role": "TempDirectory", "confidence": "High", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "uWSGI",
+      "rules": [
+        { "file_name": "uwsgi.ini", "key_regex": "logto\\s*=\\s*(.+)",             "role": "AppStorage", "confidence": "High",   "known_allow_dirs": [] },
+        { "file_name": "uwsgi.ini", "key_regex": "static-map\\s*=\\s*/[^=]+=(.+)", "role": "AppStorage", "confidence": "Medium", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "Starlette",
+      "rules": [
+        {
+          "file_name": "app.py",
+          "relative_path": "uploads",
+          "role": "UploadDirectory",
+          "confidence": "Medium",
+          "known_allow_dirs": [
+            "uploads",
+            "static",
+            "media"
+          ]
+        },
+        { "file_name": "app.py", "relative_path": "static",                                               "role": "AppStorage",      "confidence": "Medium", "known_allow_dirs": [] },
+        { "file_name": "app.py", "key_regex": "StaticFiles\\(.*?directory=['\"]([^'\"]+)['\"]",           "role": "AppStorage",      "confidence": "High",   "known_allow_dirs": [] },
+        { "file_name": "app.py", "key_regex": "UPLOAD_DIR\\s*=\\s*['\"]([^'\"]+)['\"]",                  "role": "UploadDirectory", "confidence": "High",   "known_allow_dirs": [] }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "sensitive_files": [
+    {
+      "path": "package.json",
+      "category": "user_keystores"
+    },
+    {
+      "path": "composer.json",
+      "category": "user_keystores"
+    },
+    {
+      "path": "setup.py",
+      "category": "user_keystores"
+    },
+    {
+      "path": "pyproject.toml",
+      "category": "user_keystores"
+    },
+    {
+      "path": "build.rs",
+      "category": "user_keystores"
+    },
+    {
+      "path": "go.mod",
+      "category": "user_keystores"
+    },
+    {
+      "path": "build.gradle",
+      "category": "user_keystores"
+    },
+    {
+      "path": "pom.xml",
+      "category": "user_keystores"
+    }
+  ]
+}

@@ -1,0 +1,278 @@
+{
+  "description": "Detection signatures for compiled language binaries (Go, Rust, Haskell, Crystal, Zig, GraalVM native-image) where the executable name is application-specific and unpredictable. Identity is established via ELF string table scanning and known framework/runtime markers. Named framework matches get a specific profile; unmatched binaries of a detected language get allow_cwd=true so vandam grants cwd-scoped write access without false-positive escalation.",
+
+  "services": [
+    {
+      "service_type": "go-gin",
+      "language": "go",
+      "executables": [],
+      "binary_strings": ["github.com/gin-gonic/gin", "gin.Default", "gin.New"],
+      "cmdline_tokens": [],
+      "default_ports": [8080, 3000],
+      "fd_signatures": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["config.yaml", "config.yml", ".env"]
+      },
+      "config_rules": [
+        { "role": "write_path", "regex": "^log[_-]?(?:path|dir|file)\\s*[=:]\\s*(.+)" },
+        { "role": "write_path", "regex": "^storage[_-]?(?:path|dir)\\s*[=:]\\s*(.+)" },
+        { "role": "write_path", "regex": "^upload[_-]?(?:path|dir)\\s*[=:]\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "go-echo",
+      "language": "go",
+      "executables": [],
+      "binary_strings": ["github.com/labstack/echo"],
+      "cmdline_tokens": [],
+      "default_ports": [1323, 8080],
+      "fd_signatures": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["config.yaml", "config.yml", ".env"]
+      },
+      "config_rules": [
+        { "role": "write_path", "regex": "^log[_-]?(?:path|dir|file)\\s*[=:]\\s*(.+)" },
+        { "role": "write_path", "regex": "^storage[_-]?(?:path|dir)\\s*[=:]\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "go-fiber",
+      "language": "go",
+      "executables": [],
+      "binary_strings": ["github.com/gofiber/fiber"],
+      "cmdline_tokens": [],
+      "default_ports": [3000, 8080],
+      "fd_signatures": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["config.yaml", "config.yml", ".env"]
+      },
+      "config_rules": [
+        { "role": "write_path", "regex": "^log[_-]?(?:path|dir|file)\\s*[=:]\\s*(.+)" },
+        { "role": "write_path", "regex": "^storage[_-]?(?:path|dir)\\s*[=:]\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "go-chi",
+      "language": "go",
+      "executables": [],
+      "binary_strings": ["github.com/go-chi/chi"],
+      "cmdline_tokens": [],
+      "default_ports": [8080],
+      "fd_signatures": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["config.yaml", "config.yml", ".env"]
+      },
+      "config_rules": [
+        { "role": "write_path", "regex": "^log[_-]?(?:path|dir|file)\\s*[=:]\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "rust-actix",
+      "language": "rust",
+      "executables": [],
+      "binary_strings": ["actix_web", "actix_rt"],
+      "cmdline_tokens": [],
+      "default_ports": [8080, 3000],
+      "fd_signatures": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["config.toml", "config.yaml", ".env", "Rocket.toml"]
+      },
+      "config_rules": [
+        { "role": "write_path", "regex": "^log[_-]?(?:path|dir|file)\\s*[=:]\\s*(.+)" },
+        { "role": "write_path", "regex": "^storage[_-]?(?:path|dir)\\s*[=:]\\s*(.+)" },
+        { "role": "write_path", "regex": "^upload[_-]?(?:path|dir)\\s*[=:]\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "rust-axum",
+      "language": "rust",
+      "executables": [],
+      "binary_strings": ["axum::", "axum::serve", "axum::Router"],
+      "cmdline_tokens": [],
+      "default_ports": [3000, 8080],
+      "fd_signatures": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["config.toml", "config.yaml", ".env"]
+      },
+      "config_rules": [
+        { "role": "write_path", "regex": "^log[_-]?(?:path|dir|file)\\s*[=:]\\s*(.+)" },
+        { "role": "write_path", "regex": "^storage[_-]?(?:path|dir)\\s*[=:]\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "rust-warp",
+      "language": "rust",
+      "executables": [],
+      "binary_strings": ["warp::Server", "warp::serve", "warp::Filter"],
+      "cmdline_tokens": [],
+      "default_ports": [3030, 8080],
+      "fd_signatures": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["config.toml", "config.yaml", ".env"]
+      },
+      "config_rules": [
+        { "role": "write_path", "regex": "^log[_-]?(?:path|dir|file)\\s*[=:]\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "quarkus-native",
+      "language": "graalvm_native",
+      "executables": [],
+      "binary_strings": ["io.quarkus", "com.oracle.svm", "QuarkusApplication"],
+      "cmdline_tokens": [],
+      "default_ports": [8080, 8443],
+      "fd_signatures": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["application.properties", "application.yaml", ".env"]
+      },
+      "config_rules": [
+        { "role": "write_path", "regex": "^quarkus\\.log\\.file\\.path\\s*=\\s*(.+)" },
+        { "role": "write_path", "regex": "^quarkus\\.http\\.root-path\\s*=\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "micronaut-native",
+      "language": "graalvm_native",
+      "executables": [],
+      "binary_strings": ["io.micronaut", "com.oracle.svm", "MicronautApplication"],
+      "cmdline_tokens": [],
+      "default_ports": [8080, 8443],
+      "fd_signatures": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["application.yml", "application.properties", ".env"]
+      },
+      "config_rules": [
+        { "role": "write_path", "regex": "^micronaut\\.application\\.name\\s*:\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "go-http-generic",
+      "language": "go",
+      "executables": [],
+      "binary_strings": ["net/http.(*Server).Serve", "net/http.ListenAndServe", ".gopclntab"],
+      "cmdline_tokens": [],
+      "default_ports": [],
+      "fd_signatures": [],
+      "assigned_profile": "restricted-execution",
+      "allow_cwd": true,
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": []
+      },
+      "config_rules": [],
+      "complexity_indicators": ["os/exec", "plugin.Open"]
+    },
+    {
+      "service_type": "rust-http-generic",
+      "language": "rust",
+      "executables": [],
+      "binary_strings": ["hyper::server", "tokio::runtime", "rustc"],
+      "cmdline_tokens": [],
+      "default_ports": [],
+      "fd_signatures": [],
+      "assigned_profile": "restricted-execution",
+      "allow_cwd": true,
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": []
+      },
+      "config_rules": [],
+      "complexity_indicators": ["std::process::Command"]
+    },
+    {
+      "service_type": "graalvm-generic",
+      "language": "graalvm_native",
+      "executables": [],
+      "binary_strings": ["com.oracle.svm", "SubstrateVM"],
+      "cmdline_tokens": [],
+      "default_ports": [],
+      "fd_signatures": [],
+      "assigned_profile": "restricted-execution",
+      "allow_cwd": true,
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": []
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "haskell-web-generic",
+      "language": "haskell",
+      "executables": [],
+      "binary_strings": ["warp-", "servant-", "scotty-", "yesod-", "happstack-", "snap-", "GHC"],
+      "cmdline_tokens": [],
+      "default_ports": [],
+      "fd_signatures": [],
+      "assigned_profile": "restricted-execution",
+      "allow_cwd": true,
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": []
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "crystal-web-generic",
+      "language": "crystal",
+      "executables": [],
+      "binary_strings": ["__crystal_main", "Kemal", "Lucky::Action", "Amber::Controller"],
+      "cmdline_tokens": [],
+      "default_ports": [],
+      "fd_signatures": [],
+      "assigned_profile": "restricted-execution",
+      "allow_cwd": true,
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": []
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "zig-http-generic",
+      "language": "zig",
+      "executables": [],
+      "binary_strings": ["std.builtin", "zig"],
+      "cmdline_tokens": [],
+      "default_ports": [],
+      "fd_signatures": [],
+      "assigned_profile": "restricted-execution",
+      "allow_cwd": true,
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": []
+      },
+      "config_rules": [],
+      "complexity_indicators": []
+    }
+  ]
+}

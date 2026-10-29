@@ -1,0 +1,6 @@
+{
+  "description": "System package directories where execution is trusted by default.",
+  "paths": [
+    "/bin", "/sbin", "/usr/bin", "/usr/sbin", "/lib", "/lib64", "/usr/lib"
+  ]
+}

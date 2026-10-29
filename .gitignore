@@ -1,0 +1,20 @@
+/target/
+
+# Maintainers' working notes and plans: kept with the checkout, never published
+/internal/
+/CLAUDE.local.md
+
+# integrations/php: phpize/configure/make output (only config.m4, *.c, *.h are source)
+/integrations/php/*
+!/integrations/php/config.m4
+!/integrations/php/*.c
+!/integrations/php/*.h
+!/integrations/php/README.md
+/integrations/php/config.h
+
+# integrations/jvm: Maven output
+/integrations/jvm/rasp-agent/target/
+/integrations/jvm/rasp-agent/dependency-reduced-pom.xml
+*.class
+
+__pycache__/

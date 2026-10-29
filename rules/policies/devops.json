@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "sensitive_files": [
+    {
+      "path": "/var/run/docker.sock",
+      "category": "user_keystores"
+    },
+    {
+      "path": "/run/containerd/containerd.sock",
+      "category": "user_keystores"
+    },
+    {
+      "path": "/var/run/secrets/kubernetes.io/",
+      "category": "user_keystores"
+    },
+    {
+      "path": "/etc/kubernetes/",
+      "category": "user_keystores"
+    }
+  ]
+}

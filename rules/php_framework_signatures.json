@@ -1,0 +1,313 @@
+{
+  "description": "Storage discovery rules for PHP frameworks and CMS platforms. Anchors are unique per framework. All .env path scanning is handled by scan_process_env_for_storage (Pillar 3) for live processes — no .env anchors here.",
+  "frameworks": [
+    {
+      "name": "WordPress",
+      "rules": [
+        {
+          "file_name": "wp-config.php",
+          "relative_path": "wp-content/uploads",
+          "role": "UploadDirectory",
+          "confidence": "High",
+          "known_allow_dirs": [
+            "wp-content/uploads",
+            "wp-content/cache",
+            "wp-content/plugins",
+            "wp-content/themes",
+            "wp-content/upgrade",
+            "wp-content/wflogs"
+          ]
+        },
+        { "file_name": "wp-config.php", "relative_path": "wp-content/cache",   "role": "CompiledCache",   "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "wp-config.php", "relative_path": "wp-content/upgrade", "role": "TempDirectory",   "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "wp-config.php", "key_regex": "define\\s*\\(\\s*'WP_CONTENT_DIR'\\s*,\\s*'([^']+)'", "role": "AppStorage",      "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "wp-config.php", "key_regex": "define\\s*\\(\\s*'UPLOADS'\\s*,\\s*'([^']+)'",        "role": "UploadDirectory", "confidence": "High", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "Laravel",
+      "rules": [
+        {
+          "file_name": "artisan",
+          "relative_path": "storage/app/public",
+          "role": "UploadDirectory",
+          "confidence": "High",
+          "known_allow_dirs": [
+            "storage/app/public",
+            "storage/framework/views",
+            "storage/framework/cache",
+            "storage/framework/sessions",
+            "storage/logs",
+            "bootstrap/cache",
+            "public/storage"
+          ]
+        },
+        { "file_name": "artisan", "relative_path": "storage/framework/views",    "role": "CompiledCache",  "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "artisan", "relative_path": "storage/framework/cache",    "role": "CompiledCache",  "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "artisan", "relative_path": "storage/framework/sessions", "role": "SessionStorage", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "artisan", "relative_path": "storage/logs",               "role": "AppStorage",     "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "artisan", "relative_path": "bootstrap/cache",            "role": "CompiledCache",  "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "config/filesystems.php", "key_regex": "'root'\\s*=>\\s*['\"]([^'\"]+)['\"]", "role": "AppStorage", "confidence": "Medium", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "Symfony",
+      "rules": [
+        {
+          "file_name": "bin/console",
+          "relative_path": "var/cache",
+          "role": "CompiledCache",
+          "confidence": "High",
+          "known_allow_dirs": [
+            "var/cache",
+            "var/log",
+            "var/sessions",
+            "public/uploads",
+            "public/media"
+          ]
+        },
+        { "file_name": "bin/console", "relative_path": "var/log",        "role": "AppStorage",      "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "bin/console", "relative_path": "var/sessions",   "role": "SessionStorage",  "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "bin/console", "relative_path": "public/uploads", "role": "UploadDirectory", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "config/services.yaml", "key_regex": "upload_dir(?:ectory)?:\\s*'?([^'\\n]+)'?", "role": "UploadDirectory", "confidence": "High", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "Drupal",
+      "rules": [
+        {
+          "file_name": "sites/default/settings.php",
+          "relative_path": "sites/default/files",
+          "role": "UploadDirectory",
+          "confidence": "High",
+          "known_allow_dirs": [
+            "sites/default/files",
+            "sites/default/files/styles",
+            "sites/default/private",
+            "sites/default/tmp",
+            "sites/all/libraries"
+          ]
+        },
+        { "file_name": "sites/default/settings.php", "relative_path": "sites/default/private", "role": "AppStorage",    "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "sites/default/settings.php", "relative_path": "sites/default/tmp",     "role": "TempDirectory", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "sites/default/settings.php", "key_regex": "'file_public_path'\\s*=>\\s*'([^']+)'",   "role": "UploadDirectory", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "sites/default/settings.php", "key_regex": "'file_private_path'\\s*=>\\s*'([^']+)'",  "role": "AppStorage",      "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "sites/default/settings.php", "key_regex": "'file_temporary_path'\\s*=>\\s*'([^']+)'","role": "TempDirectory",   "confidence": "High", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "Joomla",
+      "rules": [
+        {
+          "file_name": "configuration.php",
+          "relative_path": "images",
+          "role": "UploadDirectory",
+          "confidence": "High",
+          "known_allow_dirs": [
+            "images",
+            "media",
+            "cache",
+            "logs",
+            "administrator/cache"
+          ]
+        },
+        { "file_name": "configuration.php", "relative_path": "media",                                                         "role": "UploadDirectory", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "configuration.php", "key_regex": "public\\s+\\$tmp_path\\s*=\\s*'([^']+)'",   "role": "TempDirectory",   "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "configuration.php", "key_regex": "public\\s+\\$cache_path\\s*=\\s*'([^']+)'", "role": "CompiledCache",   "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "configuration.php", "key_regex": "public\\s+\\$log_path\\s*=\\s*'([^']+)'",   "role": "AppStorage",      "confidence": "High", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "Magento 2",
+      "rules": [
+        {
+          "file_name": "bin/magento",
+          "relative_path": "var/cache",
+          "role": "CompiledCache",
+          "confidence": "High",
+          "known_allow_dirs": [
+            "var/cache",
+            "var/session",
+            "var/log",
+            "var/tmp",
+            "var/export",
+            "pub/media",
+            "pub/static",
+            "generated/code",
+            "generated/metadata"
+          ]
+        },
+        { "file_name": "bin/magento", "relative_path": "var/session",   "role": "SessionStorage",  "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "bin/magento", "relative_path": "var/log",       "role": "AppStorage",      "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "bin/magento", "relative_path": "var/tmp",       "role": "TempDirectory",   "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "bin/magento", "relative_path": "pub/media",     "role": "UploadDirectory", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "bin/magento", "relative_path": "pub/static",    "role": "CompiledCache",   "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "app/etc/env.php", "key_regex": "'cache_dir'\\s*=>\\s*'([^']+)'",  "role": "CompiledCache",   "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "app/etc/env.php", "key_regex": "'upload_dir'\\s*=>\\s*'([^']+)'", "role": "UploadDirectory", "confidence": "High", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "PrestaShop",
+      "rules": [
+        {
+          "file_name": "config/config.inc.php",
+          "relative_path": "upload",
+          "role": "UploadDirectory",
+          "confidence": "High",
+          "known_allow_dirs": [
+            "upload",
+            "img",
+            "img/products",
+            "img/manufacturers",
+            "img/categories",
+            "cache",
+            "log",
+            "var/cache",
+            "var/logs"
+          ]
+        },
+        { "file_name": "config/config.inc.php", "relative_path": "img",   "role": "UploadDirectory", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "config/config.inc.php", "relative_path": "cache",  "role": "CompiledCache",   "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "config/config.inc.php", "key_regex": "define\\s*\\(\\s*'_PS_UPLOAD_DIR_'\\s*,\\s*([^)]+)\\)", "role": "UploadDirectory", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "config/config.inc.php", "key_regex": "define\\s*\\(\\s*'_PS_CACHE_DIR_'\\s*,\\s*([^)]+)\\)",  "role": "CompiledCache",   "confidence": "High", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "TYPO3",
+      "rules": [
+        {
+          "file_name": "typo3/index.php",
+          "relative_path": "fileadmin",
+          "role": "UploadDirectory",
+          "confidence": "High",
+          "known_allow_dirs": [
+            "fileadmin",
+            "uploads",
+            "typo3temp",
+            "typo3temp/assets",
+            "var/cache",
+            "var/log",
+            "var/session"
+          ]
+        },
+        { "file_name": "typo3/index.php", "relative_path": "var/cache",  "role": "CompiledCache",  "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "typo3/index.php", "relative_path": "var/log",    "role": "AppStorage",     "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "typo3/index.php", "relative_path": "uploads",    "role": "UploadDirectory","confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "typo3/index.php", "relative_path": "typo3temp",  "role": "TempDirectory",  "confidence": "High", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "Yii2",
+      "rules": [
+        {
+          "file_name": "config/web.php",
+          "relative_path": "runtime/cache",
+          "role": "CompiledCache",
+          "confidence": "High",
+          "known_allow_dirs": [
+            "runtime/cache",
+            "runtime/logs",
+            "runtime/sessions",
+            "web/uploads",
+            "web/assets"
+          ]
+        },
+        { "file_name": "config/web.php", "relative_path": "runtime/logs",  "role": "AppStorage",      "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "config/web.php", "relative_path": "web/uploads",   "role": "UploadDirectory", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "config/web.php", "key_regex": "'runtimePath'\\s*=>\\s*['\"]([^'\"]+)['\"]",  "role": "AppStorage",      "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "config/web.php", "key_regex": "'uploadPath'\\s*=>\\s*['\"]([^'\"]+)['\"]",   "role": "UploadDirectory", "confidence": "High", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "CodeIgniter 4",
+      "rules": [
+        {
+          "file_name": "spark",
+          "relative_path": "writable/cache",
+          "role": "CompiledCache",
+          "confidence": "High",
+          "known_allow_dirs": [
+            "writable/cache",
+            "writable/logs",
+            "writable/session",
+            "writable/tmp",
+            "writable/uploads",
+            "public/uploads"
+          ]
+        },
+        { "file_name": "spark", "relative_path": "writable/logs",    "role": "AppStorage",     "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "spark", "relative_path": "writable/session",  "role": "SessionStorage", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "spark", "relative_path": "writable/tmp",      "role": "TempDirectory",  "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "spark", "relative_path": "writable/uploads",  "role": "UploadDirectory","confidence": "High", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "CakePHP 4",
+      "rules": [
+        {
+          "file_name": "bin/cake",
+          "relative_path": "tmp/cache",
+          "role": "CompiledCache",
+          "confidence": "High",
+          "known_allow_dirs": [
+            "tmp/cache",
+            "tmp/logs",
+            "tmp/sessions",
+            "tmp/tests",
+            "webroot/files",
+            "webroot/img"
+          ]
+        },
+        { "file_name": "bin/cake", "relative_path": "tmp/logs",     "role": "AppStorage",     "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "bin/cake", "relative_path": "tmp/sessions",  "role": "SessionStorage", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "bin/cake", "relative_path": "webroot/files", "role": "UploadDirectory","confidence": "High", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "OpenCart",
+      "rules": [
+        {
+          "file_name": "config.php",
+          "key_regex": "define\\s*\\(\\s*'DIR_UPLOAD'\\s*,\\s*'([^']+)'",
+          "role": "UploadDirectory",
+          "confidence": "High",
+          "known_allow_dirs": [
+            "upload",
+            "image",
+            "image/cache",
+            "system/storage/cache",
+            "system/storage/logs",
+            "system/storage/session"
+          ]
+        },
+        { "file_name": "config.php", "key_regex": "define\\s*\\(\\s*'DIR_CACHE'\\s*,\\s*'([^']+)'",      "role": "CompiledCache",   "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "config.php", "key_regex": "define\\s*\\(\\s*'DIR_LOGS'\\s*,\\s*'([^']+)'",       "role": "AppStorage",      "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "config.php", "key_regex": "define\\s*\\(\\s*'DIR_IMAGE'\\s*,\\s*'([^']+)'",      "role": "UploadDirectory", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "config.php", "key_regex": "define\\s*\\(\\s*'DIR_APPLICATION'\\s*,\\s*'([^']+)'","role": "AppStorage",      "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "config.php", "key_regex": "define\\s*\\(\\s*'DIR_SYSTEM'\\s*,\\s*'([^']+)'",     "role": "AppStorage",      "confidence": "High", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "WHMCS",
+      "rules": [
+        {
+          "file_name": "configuration.php",
+          "relative_path": "attachments",
+          "role": "UploadDirectory",
+          "confidence": "High",
+          "known_allow_dirs": [
+            "attachments",
+            "downloads",
+            "templates_c",
+            "uploads",
+            "storage/logs"
+          ]
+        },
+        { "file_name": "configuration.php", "key_regex": "\\$attachment_dir\\s*=\\s*'([^']+)'", "role": "UploadDirectory", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "configuration.php", "key_regex": "\\$log_dir\\s*=\\s*'([^']+)'",        "role": "AppStorage",      "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "configuration.php", "key_regex": "\\$dl_path\\s*=\\s*'([^']+)'",        "role": "AppStorage",      "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "configuration.php", "key_regex": "\\$license\\s*=\\s*'([^']+)'",        "role": "AppStorage",      "confidence": "High", "known_allow_dirs": [] }
+      ]
+    }
+  ]
+}

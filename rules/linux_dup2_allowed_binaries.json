@@ -1,0 +1,20 @@
+{
+  "description": "Allowed executables permitted to perform socket dup2 redirection to stdio (e.g. Container web terminals, SSH bastion/proxy daemons, legacy CGI/inetd servers)",
+  "binaries": [
+    "kubectl",
+    "ttyd",
+    "gotty",
+    "sshd",
+    "in.telnetd",
+    "telnetd",
+    "inetd",
+    "xinetd",
+    "micro_httpd",
+    "thttpd",
+    "crictl",
+    "nerdctl",
+    "docker-exec",
+    "containerd-shim",
+    "containerd-shim-runc-v2"
+  ]
+}

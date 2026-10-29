@@ -1,0 +1,54 @@
+{
+  "description": "Read-only diagnostic commands the cloud may request vandam-pro's deep-audit agentic loop (audit_exec_command) run on its behalf during an active run's Stage 5 cloud-correlation window. Every entry's binary is an absolute path, invoked directly (never via a shell, never via $PATH) with at most one caller-supplied {target} substitution — this list is a hard allowlist, not a starting point for pattern matching. Anything not listed here is refused.",
+
+  "commands": [
+    {
+      "name": "dpkg_owner",
+      "binary": "/usr/bin/dpkg",
+      "args": ["-S", "{target}"],
+      "description": "Find which dpkg package (if any) owns a file path."
+    },
+    {
+      "name": "rpm_owner",
+      "binary": "/usr/bin/rpm",
+      "args": ["-qf", "{target}"],
+      "description": "Find which rpm package (if any) owns a file path."
+    },
+    {
+      "name": "sha256sum",
+      "binary": "/usr/bin/sha256sum",
+      "args": ["{target}"],
+      "description": "Compute a file's SHA-256 hash."
+    },
+    {
+      "name": "file_type",
+      "binary": "/usr/bin/file",
+      "args": ["{target}"],
+      "description": "Identify a file's type via magic-byte detection."
+    },
+    {
+      "name": "ldd",
+      "binary": "/usr/bin/ldd",
+      "args": ["{target}"],
+      "description": "List a binary's dynamic library dependencies."
+    },
+    {
+      "name": "listening_sockets",
+      "binary": "/usr/bin/ss",
+      "args": ["-tlnp"],
+      "description": "List currently listening TCP sockets and their owning processes."
+    },
+    {
+      "name": "service_status",
+      "binary": "/usr/bin/systemctl",
+      "args": ["status", "{target}", "--no-pager"],
+      "description": "Show a systemd unit's current status."
+    },
+    {
+      "name": "process_args",
+      "binary": "/bin/ps",
+      "args": ["-p", "{target}", "-o", "pid,ppid,user,cmd"],
+      "description": "Show a process's full command line by pid."
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "description": "Scripting languages and execution engines monitored on Linux.",
+  "interpreters": [
+    "python", "node", "perl", "ruby", "bash", "sh", "zsh", "pwsh", "php", "tclsh"
+  ]
+}

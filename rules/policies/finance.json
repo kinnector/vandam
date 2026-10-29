@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "sensitive_files": [
+    {
+      "path": "/.config/alpaca/",
+      "category": "user_keystores"
+    },
+    {
+      "path": "/.binance/",
+      "category": "user_keystores"
+    },
+    {
+      "path": "/.wine/",
+      "category": "user_keystores"
+    }
+  ]
+}

@@ -1,0 +1,228 @@
+{
+  "description": "Core Linux queue, time, and MQTT service signatures for host-native auto-discovery and config-driven policy enforcement.",
+  "services": [
+    {
+      "service_type": "chrony",
+      "executables": ["chronyd"],
+      "default_ports": [123],
+      "fd_signatures": ["chrony.conf"],
+      "cmdline_tokens": ["chronyd"],
+      "binary_strings": ["chronyd"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "-f",
+        "default_paths": ["/etc/chrony.conf", "/etc/chrony/chrony.conf"]
+      },
+      "config_rules": [
+        { "role": "write_path",  "regex": "^dumpdir\\s+(.+)" },
+        { "role": "write_path",  "regex": "^driftfile\\s+(.+)" },
+        { "role": "write_path",  "regex": "^logdir\\s+(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "ntp",
+      "executables": ["ntpd"],
+      "default_ports": [123],
+      "fd_signatures": ["ntp.conf"],
+      "cmdline_tokens": ["ntpd"],
+      "binary_strings": ["ntpd"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "-c",
+        "default_paths": ["/etc/ntp.conf"]
+      },
+      "config_rules": [
+        { "role": "write_path",  "regex": "^driftfile\\s+(.+)" },
+        { "role": "write_path",  "regex": "^statsdir\\s+(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "mosquitto",
+      "executables": ["mosquitto"],
+      "default_ports": [1883, 8883],
+      "fd_signatures": ["mosquitto.conf"],
+      "cmdline_tokens": ["mosquitto"],
+      "binary_strings": ["mosquitto"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "-c",
+        "default_paths": ["/etc/mosquitto/mosquitto.conf"]
+      },
+      "config_rules": [
+        { "role": "write_path",  "regex": "^persistence_location\\s+(.+)" },
+        { "role": "write_path",  "regex": "^log_dest\\s+file\\s+(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "rabbitmq",
+      "executables": ["beam.smp"],
+      "default_ports": [5672, 15672],
+      "fd_signatures": ["rabbitmq.conf"],
+      "cmdline_tokens": ["rabbitmq"],
+      "binary_strings": ["RabbitMQ"],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "default_paths": ["/etc/rabbitmq/rabbitmq.conf"]
+      },
+      "config_rules": [
+        { "role": "write_path",  "regex": "^mnesia_base\\s*=\\s*(.+)" },
+        { "role": "write_path",  "regex": "^log.dir\\s*=\\s*(.+)" }
+      ],
+      "complexity_indicators": [
+        "rabbitmq_auth_backend_http",
+        "rabbitmq_auth_backend_ldap",
+        "rabbitmq_event_exchange",
+        "rabbitmq_shovel",
+        "rabbitmq_federation"
+      ]
+    },
+    {
+      "service_type": "kafka",
+      "executables": ["java"],
+      "default_ports": [9092],
+      "fd_signatures": ["server.properties"],
+      "cmdline_tokens": ["kafka.Kafka"],
+      "binary_strings": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "default_paths": ["/etc/kafka/server.properties", "/opt/kafka/config/server.properties"]
+      },
+      "config_rules": [
+        { "role": "write_path",  "regex": "^log.dirs\\s*=\\s*(.+)" },
+        { "role": "outbound_ip", "regex": "connection\\.url=jdbc:[a-zA-Z0-9]+://([^:/]+)" }
+      ],
+      "complexity_indicators": [
+        "connect-standalone",
+        "connect-distributed",
+        "CommandSinkConnector",
+        "CommandSourceConnector"
+      ]
+    },
+    {
+      "service_type": "nsq",
+      "executables": ["nsqd", "nsqlookupd", "nsqadmin"],
+      "default_ports": [4150, 4151, 4160, 4161, 4171],
+      "fd_signatures": [],
+      "cmdline_tokens": ["nsqd", "nsqlookupd"],
+      "binary_strings": ["nsqd", "nsqlookupd"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "--config",
+        "default_paths": ["/etc/nsq/nsqd.cfg", "/etc/nsq/nsqlookupd.cfg"]
+      },
+      "config_rules": [
+        { "role": "write_path", "regex": "^data-path\\s*=\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "redpanda",
+      "executables": ["redpanda"],
+      "default_ports": [9092, 9644, 8082, 8081],
+      "fd_signatures": [],
+      "cmdline_tokens": ["redpanda", "start"],
+      "binary_strings": ["Redpanda"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "--config",
+        "default_paths": ["/etc/redpanda/redpanda.yaml"]
+      },
+      "config_rules": [
+        { "role": "write_path",  "regex": "data_directory:\\s*(.+)" },
+        { "role": "outbound_ip", "regex": "address:\\s*([\\d.a-zA-Z:-]+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "emqx",
+      "executables": ["emqx"],
+      "default_ports": [1883, 8883, 18083, 8083],
+      "fd_signatures": [],
+      "cmdline_tokens": ["emqx", "start"],
+      "binary_strings": ["EMQX"],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["/etc/emqx/emqx.conf", "/opt/emqx/etc/emqx.conf"]
+      },
+      "config_rules": [
+        { "role": "write_path", "regex": "^node\\.data_dir\\s*=\\s*(.+)" },
+        { "role": "write_path", "regex": "^log\\.dir\\s*=\\s*(.+)" }
+      ],
+      "complexity_indicators": ["exhook", "rule_engine.jq", "action.http"]
+    },
+    {
+      "service_type": "vernemq",
+      "executables": ["beam.smp"],
+      "default_ports": [1883, 8883, 8888],
+      "fd_signatures": [],
+      "cmdline_tokens": ["vernemq"],
+      "binary_strings": ["VerneMQ"],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["/etc/vernemq/vernemq.conf"]
+      },
+      "config_rules": [
+        { "role": "write_path", "regex": "^log\\.dir\\s*=\\s*(.+)" },
+        { "role": "write_path", "regex": "^leveldb\\.maximum_memory\\.percent" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "pulsar",
+      "executables": ["java"],
+      "default_ports": [6650, 8080],
+      "fd_signatures": ["bookkeeper.conf"],
+      "cmdline_tokens": ["org.apache.pulsar", "pulsar"],
+      "binary_strings": [],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": null,
+        "default_paths": ["/opt/pulsar/conf/broker.conf", "/etc/pulsar/broker.conf"]
+      },
+      "config_rules": [
+        { "role": "write_path",  "regex": "^managedLedgerDefaultEnsembleSize" },
+        { "role": "outbound_ip", "regex": "^zookeeperServers\\s*=\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "nats",
+      "executables": ["nats-server"],
+      "default_ports": [4222, 8222, 6222],
+      "fd_signatures": ["nats-server.conf"],
+      "cmdline_tokens": ["-c"],
+      "binary_strings": ["nats-server"],
+      "assigned_profile": "zero-execution",
+      "config_location": {
+        "cmdline_arg": "-c",
+        "default_paths": ["/etc/nats/nats-server.conf"]
+      },
+      "config_rules": [
+        { "role": "write_path", "regex": "jetstream\\s*\\{\\s*store_dir:\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    },
+    {
+      "service_type": "nsq",
+      "executables": ["nsqd", "nsqlookupd"],
+      "default_ports": [4150, 4151, 4160, 4161],
+      "fd_signatures": [],
+      "cmdline_tokens": [],
+      "binary_strings": ["nsqd", "nsqlookupd"],
+      "assigned_profile": "restricted-execution",
+      "config_location": {
+        "cmdline_arg": "--config",
+        "default_paths": ["/etc/nsq/nsqd.cfg"]
+      },
+      "config_rules": [
+        { "role": "write_path", "regex": "data_path\\s*=\\s*(.+)" }
+      ],
+      "complexity_indicators": []
+    }
+  ]
+}

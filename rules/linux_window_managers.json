@@ -1,0 +1,6 @@
+{
+  "description": "Window managers to verify active user display context for hVNC detection.",
+  "managers": [
+    "gnome-shell", "kwin_wayland", "kwin", "xfwm4", "openbox", "weston", "sway", "waybar"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "description": "Standard shell startup profile paths monitored for persistence on Linux.",
+  "paths": [
+    "/.bashrc", "/.profile", "/.bash_profile", "/.bash_login", "/.bash_logout",
+    "/.zshrc", "/.zprofile", "/.zshenv", "/.zlogout",
+    "/etc/profile", "/etc/bash.bashrc", "/etc/profile.d/"
+  ]
+}

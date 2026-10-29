@@ -1,0 +1,76 @@
+{
+  "description": "Storage discovery rules for Java web frameworks and build tools. application.properties and application.yml are shared anchors across Spring Boot, Quarkus, and Micronaut. Framework discrimination is achieved by requiring framework-specific key prefixes in key_regex (spring.*, quarkus.*, micronaut.*). The broad 'location:' YAML rule from Spring Boot has been replaced with the multipart-specific form. Generic Java App rules are only applied to the unique WEB-INF/web.xml anchor.",
+  "frameworks": [
+    {
+      "name": "Spring Boot",
+      "rules": [
+        { "file_name": "application.properties", "key_regex": "spring\\.servlet\\.multipart\\.location\\s*=\\s*(.+)",                "role": "TempDirectory",   "confidence": "High",   "known_allow_dirs": [] },
+        { "file_name": "application.properties", "key_regex": "spring\\.web\\.resources\\.static-locations\\s*=\\s*file:([^,\\s]+)", "role": "AppStorage",      "confidence": "High",   "known_allow_dirs": [] },
+        { "file_name": "application.properties", "key_regex": "logging\\.file\\.path\\s*=\\s*(.+)",                                  "role": "AppStorage",      "confidence": "High",   "known_allow_dirs": [] },
+        { "file_name": "application.properties", "key_regex": "logging\\.file\\.name\\s*=\\s*(.+)",                                  "role": "AppStorage",      "confidence": "High",   "known_allow_dirs": [] },
+        { "file_name": "application.properties", "key_regex": "server\\.tomcat\\.basedir\\s*=\\s*(.+)",                              "role": "TempDirectory",   "confidence": "High",   "known_allow_dirs": [] },
+        { "file_name": "application.properties", "key_regex": "spring\\.servlet\\.multipart\\.max-file-size\\s*=\\s*(.+)",           "role": "TempDirectory",   "confidence": "Medium", "known_allow_dirs": ["tmp","upload"] },
+        { "file_name": "application.properties", "key_regex": "upload\\.dir(?:ectory)?\\s*=\\s*(.+)",                               "role": "UploadDirectory", "confidence": "High",   "known_allow_dirs": [] },
+        { "file_name": "application.yml",        "key_regex": "multipart:\\s*(?:[\\s\\S]*?)location:\\s*(.+)",                       "role": "TempDirectory",   "confidence": "High",   "known_allow_dirs": [] },
+        { "file_name": "application.yml",        "key_regex": "upload[._-]dir(?:ectory)?:\\s*(.+)",                                 "role": "UploadDirectory", "confidence": "High",   "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "Quarkus",
+      "rules": [
+        { "file_name": "application.properties", "key_regex": "quarkus\\.log\\.file\\.path\\s*=\\s*(.+)",          "role": "AppStorage",      "confidence": "High",   "known_allow_dirs": ["logs","data","tmp"] },
+        { "file_name": "application.properties", "key_regex": "%prod\\.quarkus\\.log\\.file\\.path\\s*=\\s*(.+)", "role": "AppStorage",      "confidence": "High",   "known_allow_dirs": [] },
+        { "file_name": "application.properties", "key_regex": "quarkus\\.vertx\\.file-upload-dir\\s*=\\s*(.+)",   "role": "UploadDirectory", "confidence": "High",   "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "Micronaut",
+      "rules": [
+        { "file_name": "application.yml", "key_regex": "micronaut\\.router\\.static-resources\\.[^.]+\\.paths:\\s*file:([^\\s]+)", "role": "AppStorage", "confidence": "High",   "known_allow_dirs": ["logs","upload","static","public"] },
+        { "file_name": "application.yml", "key_regex": "micronaut\\.logging\\.file:\\s*(.+)",                                       "role": "AppStorage", "confidence": "High",   "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "WildFly / JBoss",
+      "rules": [
+        { "file_name": "standalone.xml", "relative_path": "standalone/log",  "role": "AppStorage",    "confidence": "High", "known_allow_dirs": ["standalone/log","standalone/tmp","standalone/data","standalone/deployments"] },
+        { "file_name": "standalone.xml", "relative_path": "standalone/tmp",  "role": "TempDirectory", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "domain.xml",     "relative_path": "domain/log",      "role": "AppStorage",    "confidence": "High", "known_allow_dirs": ["domain/log","domain/tmp","domain/data"] }
+      ]
+    },
+    {
+      "name": "Vert.x",
+      "rules": [
+        { "file_name": "vertx-options.json", "key_regex": "\"fileUploadDir\"\\s*:\\s*\"([^\"]+)\"",               "role": "UploadDirectory", "confidence": "High", "known_allow_dirs": ["file-uploads","upload","tmp"] }
+      ]
+    },
+    {
+      "name": "Dropwizard",
+      "rules": [
+        { "file_name": "config.yml", "key_regex": "currentLogFilename:\\s*(.+)",  "role": "AppStorage",    "confidence": "High", "known_allow_dirs": ["logs","tmp"] },
+        { "file_name": "config.yml", "key_regex": "tempFileDirectory:\\s*(.+)",   "role": "TempDirectory", "confidence": "High", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "Maven Build",
+      "rules": [
+        { "file_name": "pom.xml", "key_regex": "<outputDirectory>([^<]+)</outputDirectory>", "role": "CompiledCache", "confidence": "Medium", "known_allow_dirs": ["target","target/classes"] },
+        { "file_name": "pom.xml", "key_regex": "<directory>([^<]+)</directory>",             "role": "CompiledCache", "confidence": "Low",    "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "Gradle Build",
+      "rules": [
+        { "file_name": "build.gradle",     "key_regex": "buildDir\\s*=\\s*['\"]([^'\"]+)['\"]",               "role": "CompiledCache", "confidence": "Medium", "known_allow_dirs": ["build","build/libs",".gradle"] },
+        { "file_name": "build.gradle.kts", "key_regex": "buildDir\\s*=\\s*file\\(['\"]([^'\"]+)['\"]\\)",     "role": "CompiledCache", "confidence": "Medium", "known_allow_dirs": ["build",".gradle"] }
+      ]
+    },
+    {
+      "name": "Generic Java Web App",
+      "rules": [
+        { "file_name": "WEB-INF/web.xml", "key_regex": "<param-value>([^<]*(?:upload|tmp|temp)[^<]*)</param-value>", "role": "TempDirectory", "confidence": "Low", "known_allow_dirs": ["WEB-INF/upload","WEB-INF/tmp","WEB-INF/temp"] },
+        { "file_name": "WEB-INF/web.xml", "key_regex": "<param-value>([^<]*(?:log|logs)[^<]*)</param-value>",        "role": "AppStorage",    "confidence": "Low", "known_allow_dirs": [] }
+      ]
+    }
+  ]
+}

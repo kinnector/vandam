@@ -1,0 +1,4 @@
+{
+  "description": "DEPRECATED: Generic scripting catchall rules have been intentionally removed. All .env and generic pattern scanning is now handled by scan_process_env_for_storage (Pillar 3 — live process config scanning) which runs against actual running process environments with known-key extraction and heuristic path discovery. Static filesystem scanning of generic anchors like index.php, .env, settings.py, pyproject.toml, Gemfile, and WEB-INF/web.xml produced widespread false positives and is no longer used. This file remains as a placeholder so the loader does not fail. Remove from FRAMEWORK_SIGNATURE_FILES in storage_discovery.rs once the Rust-side cleanup is complete.",
+  "frameworks": []
+}

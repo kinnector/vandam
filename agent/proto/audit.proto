@@ -1,0 +1,40 @@
+syntax = "proto3";
+package vandam.audit;
+
+// A second, independent gRPC service owned entirely by vandam — NOT a
+// modification of vandam/proto/vandam.proto's VandamService. Deliberate:
+// the deep-audit agentic loop (cloud requesting file/dir/exec data from the
+// agent mid-scan) is 100% a vandam concept with no OSS-independent
+// reason to exist, so it gets its own transport rather than growing an
+// extension point into OSS's shared CommandStream/process_cloud_command.
+// See the Audit deep-scan design plan's "why zero OSS changes" section —
+// this is the one deliberate trade-off that design makes (two concurrent
+// gRPC connections per agent instead of one).
+service AuditService {
+    // Bidirectional stream, mirroring VandamService.CommandStream's shape:
+    // the agent pushes AuditAgentMessage (registration, and replies to
+    // in-flight requests), the cloud pushes AuditConsoleMessage (agentic
+    // file/dir/exec requests, scoped to an active run).
+    rpc AuditCommandStream(stream AuditAgentMessage) returns (stream AuditConsoleMessage);
+}
+
+message AuditAgentMessage {
+    string agent_id = 1;
+    string license_key = 2;
+    // Empty for the initial registration message and for messages that
+    // aren't a reply to a specific run (there are currently none, but kept
+    // optional rather than required for forward compatibility).
+    string run_id = 3;
+    // Echoes the AuditConsoleMessage.request_id this message replies to;
+    // empty for the initial registration message.
+    string request_id = 4;
+    string payload_json = 5;
+}
+
+message AuditConsoleMessage {
+    string request_id = 1;
+    // "audit_read_file" | "audit_list_dir" | "audit_exec_command"
+    string action = 2;
+    string run_id = 3;
+    string command_json = 4;
+}

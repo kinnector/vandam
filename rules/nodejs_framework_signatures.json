@@ -1,0 +1,202 @@
+{
+  "description": "Storage discovery rules for Node.js web frameworks and build tools. Only unique config-file anchors are used. All .env scanning (UPLOAD_DIR, LOG_DIR, CACHE_DIR, etc.) is handled by scan_process_env_for_storage (Pillar 3) for live Node.js processes — no .env anchors here. Generic Node.js catchall removed entirely.",
+  "frameworks": [
+    {
+      "name": "Next.js",
+      "rules": [
+        {
+          "file_name": "next.config.js",
+          "relative_path": ".next",
+          "role": "CompiledCache",
+          "confidence": "High",
+          "known_allow_dirs": [".next", ".next/cache", "public/uploads", "public/media", "out"]
+        },
+        { "file_name": "next.config.js",  "relative_path": "public/uploads",                              "role": "UploadDirectory", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "next.config.js",  "key_regex": "distDir\\s*:\\s*['\"]([^'\"]+)['\"]",            "role": "CompiledCache",   "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "next.config.mjs", "relative_path": ".next",                                       "role": "CompiledCache",   "confidence": "High",
+          "known_allow_dirs": [".next", ".next/cache", "public/uploads", "out"] },
+        { "file_name": "next.config.mjs", "key_regex": "distDir\\s*:\\s*['\"]([^'\"]+)['\"]",            "role": "CompiledCache",   "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "next.config.ts",  "relative_path": ".next",                                       "role": "CompiledCache",   "confidence": "High",
+          "known_allow_dirs": [".next", ".next/cache", "public/uploads", "out"] },
+        { "file_name": "next.config.ts",  "key_regex": "distDir\\s*:\\s*['\"]([^'\"]+)['\"]",            "role": "CompiledCache",   "confidence": "High", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "NestJS",
+      "rules": [
+        {
+          "file_name": "nest-cli.json",
+          "relative_path": "dist",
+          "role": "CompiledCache",
+          "confidence": "High",
+          "known_allow_dirs": ["dist", "uploads", "public", "logs", "tmp"]
+        },
+        { "file_name": "nest-cli.json", "relative_path": "uploads", "role": "UploadDirectory", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "nest-cli.json", "relative_path": "logs",    "role": "AppStorage",      "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "nest-cli.json", "key_regex": "\"sourceRoot\"\\s*:\\s*\"([^\"]+)\"",    "role": "AppStorage",  "confidence": "Medium", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "Nuxt.js",
+      "rules": [
+        {
+          "file_name": "nuxt.config.js",
+          "relative_path": ".nuxt",
+          "role": "CompiledCache",
+          "confidence": "High",
+          "known_allow_dirs": [".nuxt", ".output", "public/uploads", "static/uploads", "node_modules/.cache"]
+        },
+        { "file_name": "nuxt.config.js", "relative_path": ".output",                                      "role": "CompiledCache", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "nuxt.config.js", "key_regex": "buildDir\\s*:\\s*['\"]([^'\"]+)['\"]",            "role": "CompiledCache", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "nuxt.config.ts", "relative_path": ".nuxt",                                        "role": "CompiledCache", "confidence": "High",
+          "known_allow_dirs": [".nuxt", ".output", "public/uploads"] },
+        { "file_name": "nuxt.config.ts", "key_regex": "buildDir\\s*:\\s*['\"]([^'\"]+)['\"]",            "role": "CompiledCache", "confidence": "High", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "Remix",
+      "rules": [
+        {
+          "file_name": "remix.config.js",
+          "relative_path": "build",
+          "role": "CompiledCache",
+          "confidence": "High",
+          "known_allow_dirs": ["build", "public/build", "uploads", "tmp"]
+        },
+        { "file_name": "remix.config.js", "relative_path": "public/build",                                         "role": "CompiledCache", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "remix.config.js", "key_regex": "buildDirectory\\s*:\\s*['\"]([^'\"]+)['\"]",              "role": "CompiledCache", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "remix.config.js", "key_regex": "serverBuildDirectory\\s*:\\s*['\"]([^'\"]+)['\"]",        "role": "CompiledCache", "confidence": "High", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "SvelteKit",
+      "rules": [
+        {
+          "file_name": "svelte.config.js",
+          "relative_path": ".svelte-kit",
+          "role": "CompiledCache",
+          "confidence": "High",
+          "known_allow_dirs": [".svelte-kit", "build", "static/uploads", "static/media"]
+        },
+        { "file_name": "svelte.config.js", "relative_path": "build",                                     "role": "CompiledCache", "confidence": "High",   "known_allow_dirs": [] },
+        { "file_name": "svelte.config.js", "key_regex": "outDir\\s*:\\s*['\"]([^'\"]+)['\"]",           "role": "CompiledCache", "confidence": "High",   "known_allow_dirs": [] },
+        { "file_name": "svelte.config.js", "key_regex": "files\\.assets\\s*:\\s*['\"]([^'\"]+)['\"]",  "role": "AppStorage",    "confidence": "Medium", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "Astro",
+      "rules": [
+        {
+          "file_name": "astro.config.mjs",
+          "relative_path": "dist",
+          "role": "CompiledCache",
+          "confidence": "High",
+          "known_allow_dirs": ["dist", ".astro", "public/uploads", "public/media"]
+        },
+        { "file_name": "astro.config.mjs", "relative_path": ".astro",                                    "role": "CompiledCache", "confidence": "High",   "known_allow_dirs": [] },
+        { "file_name": "astro.config.mjs", "key_regex": "outDir\\s*:\\s*['\"]([^'\"]+)['\"]",           "role": "CompiledCache", "confidence": "High",   "known_allow_dirs": [] },
+        { "file_name": "astro.config.mjs", "key_regex": "publicDir\\s*:\\s*['\"]([^'\"]+)['\"]",        "role": "AppStorage",    "confidence": "Medium", "known_allow_dirs": [] },
+        { "file_name": "astro.config.ts",  "relative_path": "dist",                                      "role": "CompiledCache", "confidence": "High",
+          "known_allow_dirs": ["dist", ".astro", "public/uploads"] },
+        { "file_name": "astro.config.ts",  "key_regex": "outDir\\s*:\\s*['\"]([^'\"]+)['\"]",           "role": "CompiledCache", "confidence": "High",   "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "Gatsby",
+      "rules": [
+        {
+          "file_name": "gatsby-config.js",
+          "relative_path": "public",
+          "role": "CompiledCache",
+          "confidence": "High",
+          "known_allow_dirs": ["public", ".cache", "static/uploads", "src/images"]
+        },
+        { "file_name": "gatsby-config.js",  "relative_path": ".cache", "role": "CompiledCache", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "gatsby-config.ts",  "relative_path": "public", "role": "CompiledCache", "confidence": "High", "known_allow_dirs": ["public", ".cache", "static/uploads"] },
+        { "file_name": "gatsby-config.ts",  "relative_path": ".cache", "role": "CompiledCache", "confidence": "High", "known_allow_dirs": [] },
+        { "file_name": "gatsby-config.mjs", "relative_path": "public", "role": "CompiledCache", "confidence": "High", "known_allow_dirs": ["public", ".cache", "static/uploads"] }
+      ]
+    },
+    {
+      "name": "RedwoodJS",
+      "rules": [
+        {
+          "file_name": "redwood.toml",
+          "relative_path": "web/dist",
+          "role": "CompiledCache",
+          "confidence": "High",
+          "known_allow_dirs": ["web/dist", "api/dist", "web/public/uploads", "api/db"]
+        },
+        { "file_name": "redwood.toml", "relative_path": "api/dist", "role": "CompiledCache", "confidence": "High", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "AdonisJS",
+      "rules": [
+        {
+          "file_name": ".adonisrc.json",
+          "relative_path": "build",
+          "role": "CompiledCache",
+          "confidence": "High",
+          "known_allow_dirs": ["build", "tmp", "storage", "public/uploads"]
+        },
+        { "file_name": "adonisrc.json", "relative_path": "build", "role": "CompiledCache", "confidence": "High", "known_allow_dirs": ["build", "tmp", "storage", "public/uploads"] },
+        { "file_name": ".adonisrc.json", "relative_path": "tmp",   "role": "TempDirectory",  "confidence": "High", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "SolidStart",
+      "rules": [
+        {
+          "file_name": "app.config.ts",
+          "relative_path": ".output",
+          "role": "CompiledCache",
+          "confidence": "High",
+          "known_allow_dirs": [".output", "dist", "public/uploads"]
+        },
+        { "file_name": "app.config.js",  "relative_path": ".output", "role": "CompiledCache", "confidence": "High", "known_allow_dirs": [".output", "dist", "public/uploads"] },
+        { "file_name": "app.config.ts",  "relative_path": "dist",    "role": "CompiledCache", "confidence": "High", "known_allow_dirs": [] }
+      ]
+    },
+    {
+      "name": "Sails.js",
+      "rules": [
+        {
+          "file_name": ".sailsrc",
+          "relative_path": ".tmp",
+          "role": "TempDirectory",
+          "confidence": "High",
+          "known_allow_dirs": [".tmp", "views", "api", "assets", "public/uploads"]
+        }
+      ]
+    },
+    {
+      "name": "Vite",
+      "rules": [
+        {
+          "file_name": "vite.config.js",
+          "relative_path": "dist",
+          "role": "CompiledCache",
+          "confidence": "High",
+          "known_allow_dirs": ["dist", ".vite", "public/uploads"]
+        },
+        { "file_name": "vite.config.ts",  "relative_path": "dist", "role": "CompiledCache", "confidence": "High", "known_allow_dirs": ["dist", ".vite", "public/uploads"] },
+        { "file_name": "vite.config.mjs", "relative_path": "dist", "role": "CompiledCache", "confidence": "High", "known_allow_dirs": ["dist", ".vite", "public/uploads"] },
+        { "file_name": "vite.config.mts", "relative_path": "dist", "role": "CompiledCache", "confidence": "High", "known_allow_dirs": ["dist", ".vite", "public/uploads"] }
+      ]
+    },
+    {
+      "name": "Fastify",
+      "rules": [
+        {
+          "file_name": "fastify.config.js",
+          "relative_path": "dist",
+          "role": "CompiledCache",
+          "confidence": "High",
+          "known_allow_dirs": ["dist", "uploads", "tmp"]
+        },
+        { "file_name": "fastify.json", "relative_path": "dist", "role": "CompiledCache", "confidence": "High", "known_allow_dirs": ["dist", "uploads", "tmp"] }
+      ]
+    }
+  ]
+}

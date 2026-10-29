@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "sensitive_files": [
+    {
+      "path": "/.config/google-chrome/",
+      "category": "browser_db"
+    },
+    {
+      "path": "/.config/google-chrome-beta/",
+      "category": "browser_db"
+    },
+    {
+      "path": "/.config/google-chrome-unstable/",
+      "category": "browser_db"
+    },
+    {
+      "path": "/.config/BraveSoftware/Brave-Browser/",
+      "category": "browser_db"
+    },
+    {
+      "path": "/.config/chromium/",
+      "category": "browser_db"
+    },
+    {
+      "path": "/.mozilla/firefox/",
+      "category": "browser_db"
+    },
+    {
+      "path": "/.waterfox/",
+      "category": "browser_db"
+    },
+    {
+      "path": "/.librewolf/",
+      "category": "browser_db"
+    },
+    {
+      "path": "/.config/librewolf/",
+      "category": "browser_db"
+    },
+    {
+      "path": "/.config/microsoft-edge/",
+      "category": "browser_db"
+    },
+    {
+      "path": "/snap/chromium/common/.config/chromium/",
+      "category": "browser_db"
+    },
+    {
+      "path": "/snap/brave/common/.config/BraveSoftware/Brave-Browser/",
+      "category": "browser_db"
+    },
+    {
+      "path": "/snap/firefox/common/.mozilla/firefox/",
+      "category": "browser_db"
+    },
+    {
+      "path": "/snap/waterfox/common/.waterfox/",
+      "category": "browser_db"
+    },
+    {
+      "path": "/snap/librewolf/common/.librewolf/",
+      "category": "browser_db"
+    },
+    {
+      "path": "/snap/google-chrome/common/.config/google-chrome/",
+      "category": "browser_db"
+    },
+    {
+      "path": "/snap/google-chrome-beta/common/.config/google-chrome-beta/",
+      "category": "browser_db"
+    },
+    {
+      "path": "/snap/google-chrome-unstable/common/.config/google-chrome-unstable/",
+      "category": "browser_db"
+    },
+    {
+      "path": "/.var/app/com.google.Chrome/config/google-chrome/",
+      "category": "browser_db"
+    },
+    {
+      "path": "/.var/app/com.google.ChromeBeta/",
+      "category": "browser_db"
+    },
+    {
+      "path": "/.var/app/com.google.ChromeDev/",
+      "category": "browser_db"
+    },
+    {
+      "path": "/.var/app/org.chromium.Chromium/config/chromium/",
+      "category": "browser_db"
+    },
+    {
+      "path": "/.var/app/com.brave.Browser/config/BraveSoftware/Brave-Browser/",
+      "category": "browser_db"
+    },
+    {
+      "path": "/.var/app/org.mozilla.firefox/.mozilla/firefox/",
+      "category": "browser_db"
+    },
+    {
+      "path": "/.var/app/net.waterfox.waterfox/.waterfox/",
+      "category": "browser_db"
+    },
+    {
+      "path": "/.var/app/io.gitlab.librewolf-community/.librewolf/",
+      "category": "browser_db"
+    }
+  ]
+}
